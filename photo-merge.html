@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>照片合并工具</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #1a1a1d;
+    --panel: #232327;
+    --panel-2: #2c2c31;
+    --line: #38383e;
+    --ink: #f2f0ec;
+    --ink-dim: #9a9a9f;
+    --accent: #e8842c;
+    --accent-dim: #7a4a24;
+    --danger: #d9584a;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    min-height: 100vh;
+  }
+
+  .wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+  }
+
+  header {
+    margin-bottom: 40px;
+  }
+
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0 0 10px;
+    letter-spacing: -0.01em;
+  }
+
+  .sub {
+    color: var(--ink-dim);
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 46ch;
+  }
+
+  /* Dropzone */
+  .dropzone {
+    border: 1.5px dashed var(--line);
+    border-radius: 14px;
+    padding: 40px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    background: var(--panel);
+  }
+
+  .dropzone:hover, .dropzone.drag {
+    border-color: var(--accent);
+    background: var(--panel-2);
+  }
+
+  .dropzone svg {
+    width: 32px;
+    height: 32px;
+    stroke: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .dropzone .title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .dropzone .hint {
+    font-size: 13px;
+    color: var(--ink-dim);
+  }
+
+  input[type="file"] { display: none; }
+
+  /* Photo grid */
+  .grid-section {
+    margin-top: 28px;
+  }
+
+  .grid-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .count {
+    font-size: 13px;
+    color: var(--ink-dim);
+  }
+
+  .count b { color: var(--ink); }
+
+  .clear-btn {
+    background: none;
+    border: none;
+    color: var(--ink-dim);
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    padding: 0;
+  }
+
+  .clear-btn:hover { color: var(--danger); }
+
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 10px;
+  }
+
+  .thumb {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    cursor: grab;
+  }
+
+  .thumb.dragging { opacity: 0.4; }
+
+  .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+  }
+
+  .thumb .num {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background: rgba(0,0,0,0.65);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 5px;
+    line-height: 1.4;
+  }
+
+  .thumb .remove {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    background: rgba(0,0,0,0.65);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  .thumb .remove:hover { background: var(--danger); }
+
+  .reorder-hint {
+    font-size: 12px;
+    color: var(--ink-dim);
+    margin-top: 10px;
+  }
+
+  /* Grid options */
+  .grid-options {
+    margin-top: 24px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+
+  .grid-options label {
+    font-size: 13px;
+    color: var(--ink-dim);
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .range-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .range-row input[type="range"] {
+    flex: 1;
+    accent-color: var(--accent);
+  }
+
+  .range-row span {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+    min-width: 18px;
+    text-align: center;
+  }
+
+  /* Actions */
+  .actions {
+    margin-top: 32px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    flex: 1;
+    min-width: 150px;
+    padding: 16px 20px;
+    border-radius: 10px;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.1s ease, background 0.15s ease;
+  }
+
+  .btn:active { transform: scale(0.98); }
+
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #1a1a1d;
+  }
+
+  .btn-primary:hover:not(:disabled) { background: #f2963f; }
+
+  .btn-secondary {
+    background: var(--panel-2);
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+
+  .btn-secondary:hover:not(:disabled) { border-color: var(--accent); }
+
+  /* Status */
+  .status {
+    margin-top: 18px;
+    font-size: 13px;
+    color: var(--ink-dim);
+    min-height: 20px;
+  }
+
+  .status.error { color: var(--danger); }
+  .status.success { color: var(--accent); }
+
+  /* Preview result */
+  .result {
+    margin-top: 32px;
+    display: none;
+  }
+
+  .result.show { display: block; }
+
+  .result-header {
+    font-size: 13px;
+    color: var(--ink-dim);
+    margin-bottom: 10px;
+  }
+
+  .result-frame {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    max-height: 420px;
+    overflow-y: auto;
+    background: var(--panel);
+  }
+
+  .result-frame img {
+    width: 100%;
+    display: block;
+  }
+
+  .download-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .download-link:hover { text-decoration: underline; }
+
+  footer {
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--ink-dim);
+    text-align: center;
+  }
+
+  @media (max-width: 480px) {
+    h1 { font-size: 26px; }
+    .wrap { padding: 32px 16px 64px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">图片工具</div>
+    <h1>照片合并</h1>
+    <p class="sub">上传任意数量的 JPG 或 PNG,拖动调整顺序,选择输出成一张长图,或一份每页一张的 PDF。</p>
+  </header>
+
+  <div class="dropzone" id="dropzone">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="17 8 12 3 7 8"/>
+      <line x1="12" y1="3" x2="12" y2="15"/>
+    </svg>
+    <div class="title">点击选择照片,或直接拖拽到这里</div>
+    <div class="hint">支持 JPG / PNG，数量不限</div>
+    <input type="file" id="fileInput" accept="image/jpeg,image/png" multiple>
+  </div>
+
+  <div class="grid-section" id="gridSection" style="display:none;">
+    <div class="grid-header">
+      <div class="count">已选 <b id="photoCount">0</b> 张照片</div>
+      <button class="clear-btn" id="clearBtn">清空全部</button>
+    </div>
+    <div class="photo-grid" id="photoGrid"></div>
+    <div class="reorder-hint">拖动缩略图可调整排列顺序</div>
+  </div>
+
+  <div class="grid-options" id="gridOptions" style="display:none;">
+    <label for="gridCols">拼贴图每行照片数量</label>
+    <div class="range-row">
+      <input type="range" id="gridCols" min="2" max="6" value="3">
+      <span id="gridColsValue">3</span>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-primary" id="mergeImageBtn" disabled>合并成一张长图</button>
+    <button class="btn btn-secondary" id="mergePdfBtn" disabled>合并成 PDF</button>
+    <button class="btn btn-secondary" id="mergeGridBtn" disabled>合并成网格拼贴图</button>
+  </div>
+
+  <div class="status" id="status"></div>
+
+  <div class="result" id="result">
+    <div class="result-header">预览</div>
+    <div class="result-frame" id="resultFrame"></div>
+    <a class="download-link" id="downloadLink" download>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      下载文件
+    </a>
+  </div>
+
+  <footer>所有处理都在你的浏览器本地完成，照片不会上传到任何服务器。</footer>
+</div>
+
+<script>
+(function () {
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+  const gridSection = document.getElementById('gridSection');
+  const photoGrid = document.getElementById('photoGrid');
+  const photoCount = document.getElementById('photoCount');
+  const clearBtn = document.getElementById('clearBtn');
+  const mergeImageBtn = document.getElementById('mergeImageBtn');
+  const mergePdfBtn = document.getElementById('mergePdfBtn');
+  const mergeGridBtn = document.getElementById('mergeGridBtn');
+  const gridOptions = document.getElementById('gridOptions');
+  const gridCols = document.getElementById('gridCols');
+  const gridColsValue = document.getElementById('gridColsValue');
+  const statusEl = document.getElementById('status');
+  const resultEl = document.getElementById('result');
+  const resultFrame = document.getElementById('resultFrame');
+  const downloadLink = document.getElementById('downloadLink');
+
+  let photos = []; // { id, file, url }
+  let dragSrcIndex = null;
+
+  function setStatus(msg, type) {
+    statusEl.textContent = msg || '';
+    statusEl.className = 'status' + (type ? ' ' + type : '');
+  }
+
+  function updateButtons() {
+    const has = photos.length > 0;
+    mergeImageBtn.disabled = !has;
+    mergePdfBtn.disabled = !has;
+    mergeGridBtn.disabled = !has;
+    gridSection.style.display = has ? 'block' : 'none';
+    gridOptions.style.display = has ? 'block' : 'none';
+    photoCount.textContent = photos.length;
+  }
+
+  gridCols.addEventListener('input', () => {
+    gridColsValue.textContent = gridCols.value;
+  });
+
+  function addFiles(fileList) {
+    const files = Array.from(fileList).filter(f => f.type === 'image/jpeg' || f.type === 'image/png');
+    if (files.length === 0) {
+      setStatus('请选择 JPG 或 PNG 格式的图片。', 'error');
+      return;
+    }
+    files.forEach(file => {
+      const id = Date.now() + '_' + Math.random().toString(36).slice(2);
+      const url = URL.createObjectURL(file);
+      photos.push({ id, file, url });
+    });
+    setStatus('');
+    renderGrid();
+    updateButtons();
+  }
+
+  function renderGrid() {
+    photoGrid.innerHTML = '';
+    photos.forEach((p, i) => {
+      const div = document.createElement('div');
+      div.className = 'thumb';
+      div.draggable = true;
+      div.dataset.index = i;
+
+      const img = document.createElement('img');
+      img.src = p.url;
+      div.appendChild(img);
+
+      const num = document.createElement('div');
+      num.className = 'num';
+      num.textContent = i + 1;
+      div.appendChild(num);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove';
+      removeBtn.innerHTML = '&times;';
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        URL.revokeObjectURL(p.url);
+        photos.splice(i, 1);
+        renderGrid();
+        updateButtons();
+      });
+      div.appendChild(removeBtn);
+
+      div.addEventListener('dragstart', () => {
+        dragSrcIndex = i;
+        div.classList.add('dragging');
+      });
+      div.addEventListener('dragend', () => {
+        div.classList.remove('dragging');
+      });
+      div.addEventListener('dragover', (e) => e.preventDefault());
+      div.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const targetIndex = i;
+        if (dragSrcIndex === null || dragSrcIndex === targetIndex) return;
+        const moved = photos.splice(dragSrcIndex, 1)[0];
+        photos.splice(targetIndex, 0, moved);
+        dragSrcIndex = null;
+        renderGrid();
+      });
+
+      photoGrid.appendChild(div);
+    });
+  }
+
+  clearBtn.addEventListener('click', () => {
+    photos.forEach(p => URL.revokeObjectURL(p.url));
+    photos = [];
+    renderGrid();
+    updateButtons();
+    resultEl.classList.remove('show');
+    setStatus('');
+  });
+
+  dropzone.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', (e) => addFiles(e.target.files));
+
+  ['dragenter', 'dragover'].forEach(evt => {
+    dropzone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      dropzone.classList.add('drag');
+    });
+  });
+  ['dragleave', 'drop'].forEach(evt => {
+    dropzone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('drag');
+    });
+  });
+  dropzone.addEventListener('drop', (e) => {
+    if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+  });
+
+  function loadImage(url) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+
+  mergeImageBtn.addEventListener('click', async () => {
+    if (photos.length === 0) return;
+    setStatus('正在合并图片…');
+    mergeImageBtn.disabled = true;
+    mergePdfBtn.disabled = true;
+
+    try {
+      const imgs = await Promise.all(photos.map(p => loadImage(p.url)));
+      const maxWidth = Math.max(...imgs.map(i => i.width));
+      const totalHeight = imgs.reduce((sum, i) => sum + (i.height * (maxWidth / i.width)), 0);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = maxWidth;
+      canvas.height = Math.round(totalHeight);
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      let y = 0;
+      imgs.forEach(img => {
+        const scale = maxWidth / img.width;
+        const h = img.height * scale;
+        ctx.drawImage(img, 0, y, maxWidth, h);
+        y += h;
+      });
+
+      const dataUrl = canvas.toDataURL('image/png');
+      resultFrame.innerHTML = '<img src="' + dataUrl + '" alt="合并结果">';
+      downloadLink.href = dataUrl;
+      downloadLink.download = 'merged-photos.png';
+      resultEl.classList.add('show');
+      setStatus('合并完成，共 ' + photos.length + ' 张照片。', 'success');
+    } catch (err) {
+      setStatus('合并失败，请重试。', 'error');
+      console.error(err);
+    } finally {
+      updateButtons();
+    }
+  });
+
+  mergePdfBtn.addEventListener('click', async () => {
+    if (photos.length === 0) return;
+    setStatus('正在生成 PDF…');
+    mergeImageBtn.disabled = true;
+    mergePdfBtn.disabled = true;
+
+    try {
+      const { jsPDF } = window.jspdf;
+      const imgs = await Promise.all(photos.map(p => loadImage(p.url)));
+
+      let pdf = null;
+      imgs.forEach((img, i) => {
+        const orientation = img.width > img.height ? 'l' : 'p';
+        const w = img.width;
+        const h = img.height;
+
+        if (i === 0) {
+          pdf = new jsPDF({ orientation, unit: 'px', format: [w, h] });
+        } else {
+          pdf.addPage([w, h], orientation);
+        }
+        pdf.addImage(img, 'JPEG', 0, 0, w, h, undefined, 'FAST');
+      });
+
+      const blob = pdf.output('blob');
+      const url = URL.createObjectURL(blob);
+
+      resultFrame.innerHTML = '<div style="padding:32px;text-align:center;color:#9a9a9f;font-size:14px;">PDF 已生成，共 ' + imgs.length + ' 页。点击下方按钮下载查看。</div>';
+      downloadLink.href = url;
+      downloadLink.download = 'merged-photos.pdf';
+      resultEl.classList.add('show');
+      setStatus('PDF 生成完成，共 ' + photos.length + ' 张照片。', 'success');
+    } catch (err) {
+      setStatus('生成 PDF 失败，请重试。', 'error');
+      console.error(err);
+    } finally {
+      updateButtons();
+    }
+  });
+
+  mergeGridBtn.addEventListener('click', async () => {
+    if (photos.length === 0) return;
+    setStatus('正在拼贴照片墙…');
+    mergeImageBtn.disabled = true;
+    mergePdfBtn.disabled = true;
+    mergeGridBtn.disabled = true;
+
+    try {
+      const imgs = await Promise.all(photos.map(p => loadImage(p.url)));
+      const cols = parseInt(gridCols.value, 10);
+      const rows = Math.ceil(imgs.length / cols);
+
+      // Use a fixed square cell size, cropping each photo to fill it (cover behavior)
+      const cellSize = 500;
+      const gap = 8;
+      const canvasWidth = cols * cellSize + (cols - 1) * gap;
+      const canvasHeight = rows * cellSize + (rows - 1) * gap;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#1a1a1d';
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+      imgs.forEach((img, i) => {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const x = col * (cellSize + gap);
+        const y = row * (cellSize + gap);
+
+        // cover-crop math: scale image to fill the square cell, crop overflow
+        const scale = Math.max(cellSize / img.width, cellSize / img.height);
+        const sw = cellSize / scale;
+        const sh = cellSize / scale;
+        const sx = (img.width - sw) / 2;
+        const sy = (img.height - sh) / 2;
+
+        ctx.drawImage(img, sx, sy, sw, sh, x, y, cellSize, cellSize);
+      });
+
+      const dataUrl = canvas.toDataURL('image/png');
+      resultFrame.innerHTML = '<img src="' + dataUrl + '" alt="拼贴结果">';
+      downloadLink.href = dataUrl;
+      downloadLink.download = 'photo-grid.png';
+      resultEl.classList.add('show');
+      setStatus('拼贴完成，共 ' + photos.length + ' 张照片，每行 ' + cols + ' 张。', 'success');
+    } catch (err) {
+      setStatus('拼贴失败，请重试。', 'error');
+      console.error(err);
+    } finally {
+      updateButtons();
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
