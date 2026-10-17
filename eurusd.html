@@ -36,6 +36,16 @@ td small{display:block;color:var(--mute);font-size:12px}
 .links a{display:block;padding:10px 0;border-top:1px solid var(--line);color:var(--accent);text-decoration:none}
 .links a span{display:block;color:var(--mute);font-size:13px}
 .links h3{font-size:13px;color:var(--mute);margin:12px 0 0;font-weight:600}
+.today{padding:10px 12px;border-radius:8px;background:var(--bg);margin-bottom:12px;font-size:15px}
+.today.hot{border:2px solid var(--warn)}
+.ev{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;padding:9px 0;border-top:1px solid var(--line);font-size:14px}
+.ev .tm{color:var(--mute);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ev .nm b{font-weight:600}
+.ev small{display:block;color:var(--mute);font-size:12px}
+.ev.past{opacity:.55}
+.ev.now .tm{color:var(--warn);font-weight:700}
+.imp{display:inline-block;font-size:11px;font-weight:700;padding:0 6px;border-radius:99px;border:1px solid var(--line);margin-left:6px}
+.imp.High{border-color:var(--down);color:var(--down)}
 .note{font-size:13px;color:var(--mute);margin:10px 0 0}
 .tag{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;font-weight:700;border:1px solid var(--warn);color:var(--warn)}
 @media(max-width:420px){.two{grid-template-columns:1fr}}
@@ -62,6 +72,9 @@ td small{display:block;color:var(--mute);font-size:12px}
 
 <section>
   <h2 data-i="s2"></h2><p class="sub" data-i="s2sub"></p>
+  <div class="today" id="today"></div>
+  <div id="cal"></div>
+  <p class="note" id="calNote"></p>
   <table>
     <thead><tr><th></th><th>USD</th><th>EUR</th></tr></thead>
     <tbody id="macro"></tbody>
@@ -105,7 +118,9 @@ zh:{title:"欧元美元 开盘前参考",
  unemp:"失业率",cpi:"CPI 年增率",core:"核心 CPI 年增率",prev:"上期",
  lean:{hawkish:"偏鹰",neutral:"中性",dovish:"偏鸽"},
  rel:{"USD more hawkish than EUR":"美元比欧元更偏鹰","USD more dovish than EUR":"美元比欧元更偏鸽","about balanced":"美元和欧元大致持平"},relH:"相对：",
- old:"数据过旧",updated:"更新",stale:"超过4天没更新，请检查 GitHub Actions",err:"读不到数据文件",noData:"暂无数据",
+ old:"数据过旧",
+ calH:"未来 14 天重要数据（美元、欧元）",todayNone:"今天没有高影响数据。",todayHas:"今天有重要数据：",fc:"预期",pv:"前值",done:"已公布",hi:"高",md:"中",today:"今天",tmr:"明天",calErr:"读不到日历数据",calHint:"时间按新加坡时区。日历每个自动更新日读一次，预期值可能在数据公布前有变动。",
+ updated:"更新",stale:"超过4天没更新，请检查 GitHub Actions",err:"读不到数据文件",noData:"暂无数据",
  lev:"对冲基金（杠杆资金）",am:"资产管理机构",netLong:"净多",netShort:"净空",wk:"较上周",oi:"占总持仓",pctl:"近一年位置",
  high:"接近一年最高",low:"接近一年最低",mid:"中间区域",cotAsof:"持仓日期"},
 en:{title:"EURUSD Pre-open Reference",
@@ -119,7 +134,9 @@ en:{title:"EURUSD Pre-open Reference",
  unemp:"Unemployment",cpi:"CPI YoY",core:"Core CPI YoY",prev:"prev",
  lean:{hawkish:"Hawkish",neutral:"Neutral",dovish:"Dovish"},
  rel:{"USD more hawkish than EUR":"USD more hawkish than EUR","USD more dovish than EUR":"USD more dovish than EUR","about balanced":"USD and EUR about balanced"},relH:"Relative: ",
- old:"outdated",updated:"Updated",stale:"Not updated for 4+ days, check GitHub Actions",err:"Cannot read data file",noData:"No data",
+ old:"outdated",
+ calH:"Upcoming key releases, next 14 days (USD, EUR)",todayNone:"No high-impact releases today.",todayHas:"Key releases today: ",fc:"Fcst",pv:"Prev",done:"Released",hi:"High",md:"Med",today:"Today",tmr:"Tomorrow",calErr:"Cannot read calendar data",calHint:"Times in Singapore time. The calendar refreshes once per update day, so forecasts may change before release.",
+ updated:"Updated",stale:"Not updated for 4+ days, check GitHub Actions",err:"Cannot read data file",noData:"No data",
  lev:"Hedge funds (leveraged)",am:"Asset managers",netLong:"Net long",netShort:"Net short",wk:"vs last week",oi:"of open interest",pctl:"1-year rank",
  high:"Near 1-year high",low:"Near 1-year low",mid:"Mid-range",cotAsof:"Positions as of"}
 };
@@ -128,6 +145,24 @@ try{lang=localStorage.getItem("lang")||"zh"}catch(e){}
 const $=id=>document.getElementById(id), t=k=>T[lang][k];
 const sg=x=>(x>0?"+":"")+x;
 const f=(v,s)=>(v===null||v===undefined)?"—":v+(s||"");
+
+const ZH=[["non-farm","非农就业"],["unemployment rate","失业率"],["core cpi","核心 CPI"],["cpi","CPI"],["core pce","核心 PCE"],["pce","PCE"],["fomc","FOMC"],["federal funds rate","联邦基金利率"],["main refinancing","欧洲央行利率决议"],["deposit facility","欧洲央行利率决议"],["ecb press","欧洲央行记者会"],["gdp","GDP"],["retail sales","零售销售"],["pmi","PMI"],["ppi","PPI"],["jobless claims","初请失业金"],["ism","ISM"],["employment change","就业变动"],["jolts","JOLTS"],["confidence","信心指数"],["sentiment","情绪指数"],["speaks","发言"],["minutes","会议纪要"]];
+function zhName(n){const l=n.toLowerCase();for(const [k,v] of ZH){if(l.includes(k))return v+" ("+n+")"}return n}
+function renderCal(){
+  const c=D&&D.calendar, box=$("cal"), td=$("today");
+  if(!c||c.error){box.innerHTML="";td.textContent=(c&&c.error)?t("calErr")+": "+c.error:(ERR?"":t("noData"));$("calNote").textContent="";return;}
+  const tz="Asia/Singapore", now=Date.now();
+  const dayKey=ms=>new Date(ms).toLocaleDateString("en-CA",{timeZone:tz});
+  const todayKey=dayKey(now), tmrKey=dayKey(now+864e5);
+  const hhmm=ms=>new Date(ms).toLocaleTimeString("en-GB",{timeZone:tz,hour12:false,hour:"2-digit",minute:"2-digit"});
+  const dlabel=ms=>{const k=dayKey(ms);if(k===todayKey)return t("today");if(k===tmrKey)return t("tmr");
+    return new Date(ms).toLocaleDateString(lang==="zh"?"zh-CN":"en-GB",{timeZone:tz,weekday:"short",month:"numeric",day:"numeric"})};
+  const evs=c.events.map(e=>Object.assign({ms:new Date(e.time).getTime()},e)).filter(e=>e.ms>=now-3*36e5);
+  const todays=evs.filter(e=>dayKey(e.ms)===todayKey&&e.impact==="High");
+  td.className="today"+(todays.length?" hot":"");
+  td.textContent=todays.length?t("todayHas")+todays.map(e=>hhmm(e.ms)+" "+e.currency+" "+(lang==="zh"?zhName(e.title):e.title)).join("；"):t("todayNone");
+  box.innerHTML="";$("calNote").textContent="";
+}
 
 function render(){
   document.documentElement.lang=lang==="zh"?"zh-CN":"en";
@@ -170,6 +205,7 @@ function render(){
   const errs=[(mu&&mu.error)?"USD: "+mu.error:"",(me&&me.error)?"EUR: "+me.error:""].filter(Boolean).join(" | ");
   $("macroNote").textContent=errs;
 
+  renderCal();
   // 4
   const c=D&&D.cot;
   if(!c||c.error){$("cot").innerHTML="";$("cotSub").textContent=(c&&c.error)?c.error:t("noData");return;}
