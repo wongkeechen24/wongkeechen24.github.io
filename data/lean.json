@@ -1,0 +1,27 @@
+{
+  "updated": "2026-10-17T08:27:09+00:00",
+  "usd": {
+    "asof": "2026-10-15",
+    "policy_rate": 3.88,
+    "short_yield_6m": 4.35,
+    "yield_2y": 4.77,
+    "score_bp": 68.0,
+    "score_5d_ago_bp": 64.5,
+    "change_bp": 3.5,
+    "lean": "hawkish"
+  },
+  "eur": {
+    "asof": "2026-10-15",
+    "policy_rate": 2.5,
+    "short_yield_6m": 2.841,
+    "yield_2y": 3.2,
+    "score_bp": 52.1,
+    "score_5d_ago_bp": 54.5,
+    "change_bp": -2.4,
+    "lean": "hawkish"
+  },
+  "relative": {
+    "usd_minus_eur_bp": 15.9,
+    "reading": "USD more hawkish than EUR"
+  }
+}
