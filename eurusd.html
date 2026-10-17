@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EURUSD 开盘前参考 / Pre-open Reference</title>
+<style>
+:root{--bg:#eef1f4;--panel:#fff;--ink:#14202b;--mute:#5b6b7a;--line:#d5dce3;--accent:#16476a;--up:#1f7a4d;--down:#b3261e;--warn:#a76400}
+@media (prefers-color-scheme:dark){:root{--bg:#10171d;--panel:#18222b;--ink:#e6edf3;--mute:#92a3b3;--line:#2b3946;--accent:#7ab6e0;--up:#6fd3a0;--down:#ff8a80;--warn:#f0b95a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,"Segoe UI","PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+h1{font-size:18px;margin:0}
+.meta{font-size:13px;color:var(--mute)}
+.lang button{border:1px solid var(--line);background:transparent;color:var(--ink);padding:6px 12px;cursor:pointer;font:inherit;font-size:14px}
+.lang button:first-child{border-radius:6px 0 0 6px}.lang button:last-child{border-radius:0 6px 6px 0;border-left:0}
+.lang button[aria-pressed=true]{background:var(--accent);color:#fff;border-color:var(--accent)}
+button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+main{max-width:760px;margin:0 auto;padding:14px;display:grid;gap:14px}
+section{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+h2{font-size:16px;margin:0 0 4px}
+.sub{font-size:13px;color:var(--mute);margin:0 0 12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{border:1px solid var(--line);border-radius:8px;padding:12px}
+.card .cur{font-size:13px;color:var(--mute)}
+.card .big{font-size:24px;font-weight:800;margin:2px 0}
+.hawk{color:var(--down)}.dove{color:var(--up)}.neut{color:var(--mute)}
+.rows{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:14px;color:var(--mute)}
+.rows b{color:var(--ink);font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.rel{margin-top:10px;padding:10px 12px;border-radius:8px;background:var(--bg);font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{padding:9px 6px;border-top:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left}
+thead th{border-top:0;color:var(--mute);font-weight:600;font-size:13px}
+td small{display:block;color:var(--mute);font-size:12px}
+.links a{display:block;padding:10px 0;border-top:1px solid var(--line);color:var(--accent);text-decoration:none}
+.links a span{display:block;color:var(--mute);font-size:13px}
+.links h3{font-size:13px;color:var(--mute);margin:12px 0 0;font-weight:600}
+.note{font-size:13px;color:var(--mute);margin:10px 0 0}
+.tag{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;font-weight:700;border:1px solid var(--warn);color:var(--warn)}
+@media(max-width:420px){.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1 data-i="title"></h1><div class="meta" id="meta"></div></div>
+  <div class="lang" role="group" aria-label="Language">
+    <button data-lang="zh" aria-pressed="true">中文</button><button data-lang="en" aria-pressed="false">English</button>
+  </div>
+</header>
+<main>
+
+<section>
+  <h2 data-i="s1"></h2><p class="sub" data-i="s1sub"></p>
+  <div class="two">
+    <div class="card"><div class="cur">USD · Fed</div><div class="big" id="bUSD"></div><div class="rows" id="dUSD"></div></div>
+    <div class="card"><div class="cur">EUR · ECB</div><div class="big" id="bEUR"></div><div class="rows" id="dEUR"></div></div>
+  </div>
+  <div class="rel" id="rel"></div>
+  <p class="note" data-i="s1note"></p>
+</section>
+
+<section>
+  <h2 data-i="s2"></h2><p class="sub" data-i="s2sub"></p>
+  <table>
+    <thead><tr><th></th><th>USD</th><th>EUR</th></tr></thead>
+    <tbody id="macro"></tbody>
+  </table>
+  <p class="note" id="macroNote"></p>
+</section>
+
+<section class="links">
+  <h2 data-i="s3"></h2><p class="sub" data-i="s3sub"></p>
+  <h3 data-i="gCal"></h3>
+  <a href="https://www.forexfactory.com/calendar" target="_blank" rel="noopener">Forex Factory<span data-i="l1"></span></a>
+  <a href="https://www.fxstreet.com/economic-calendar" target="_blank" rel="noopener">FXStreet<span data-i="l2"></span></a>
+  <h3 data-i="gNews"></h3>
+  <a href="https://www.fxstreet.com/news" target="_blank" rel="noopener">FXStreet News<span data-i="l3"></span></a>
+  <a href="https://www.reuters.com/markets/currencies/" target="_blank" rel="noopener">Reuters<span data-i="l4"></span></a>
+  <h3 data-i="gOff"></h3>
+  <a href="https://www.federalreserve.gov/newsevents/pressreleases.htm" target="_blank" rel="noopener">Federal Reserve<span data-i="l5"></span></a>
+  <a href="https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm" target="_blank" rel="noopener">FOMC<span data-i="l6"></span></a>
+  <a href="https://www.ecb.europa.eu/press/pr/html/index.en.html" target="_blank" rel="noopener">ECB<span data-i="l7"></span></a>
+  <a href="https://www.bls.gov/schedule/news_release/" target="_blank" rel="noopener">BLS<span data-i="l8"></span></a>
+  <a href="https://ec.europa.eu/eurostat/news/release-calendar" target="_blank" rel="noopener">Eurostat<span data-i="l9"></span></a>
+</section>
+
+<section>
+  <h2 data-i="s4"></h2><p class="sub" id="cotSub"></p>
+  <div class="two" id="cot"></div>
+  <p class="note" data-i="s4note"></p>
+</section>
+
+</main>
+<script>
+const T={
+zh:{title:"欧元美元 开盘前参考",
+ s1:"1. 市场对美元和欧元的看法",s1sub:"每个交易日自动更新",
+ s1note:"根据 6 个月和 2 年期国债收益率与政策利率的差距推算，是粗略的方向参考，不是降息加息概率。标签偏鹰的情况会比较常见，请多看“近5日变化”和两边的对比。",
+ s2:"2. 利率、失业率、CPI",s2sub:"这些数据每月公布一次，显示最新值和上一期",
+ s3:"3. 重点新闻（链接）",s3sub:"点开直接看",gCal:"经济日历",gNews:"新闻快讯",gOff:"官方",
+ l1:"公布时间、预期值、实际值",l2:"英文，可筛选影响等级",l3:"外汇快讯和解读",l4:"路透社外汇",l5:"新闻稿和声明",l6:"会议日程",l7:"欧洲央行新闻稿",l8:"非农、CPI 公布日程",l9:"欧元区数据公布日程",
+ s4:"4. 大资金持仓（CFTC，欧元期货）",s4note:"每周五公布，数据是前一个周二的持仓，所以滞后约 3 到 10 天，只适合看大背景。净多代表看涨欧元对美元。极端位置（接近一年最高或最低）说明仓位拥挤，趋势延续的风险偏高。",
+ policy:"政策利率",y6:"6个月收益率",y2:"2年期收益率",chg:"近5日变化",asof:"数据日期",
+ unemp:"失业率",cpi:"CPI 年增率",core:"核心 CPI 年增率",prev:"上期",
+ lean:{hawkish:"偏鹰",neutral:"中性",dovish:"偏鸽"},
+ rel:{"USD more hawkish than EUR":"美元比欧元更偏鹰","USD more dovish than EUR":"美元比欧元更偏鸽","about balanced":"美元和欧元大致持平"},relH:"相对：",
+ updated:"更新",stale:"超过4天没更新，请检查 GitHub Actions",err:"读不到数据文件",noData:"暂无数据",
+ lev:"对冲基金（杠杆资金）",am:"资产管理机构",netLong:"净多",netShort:"净空",wk:"较上周",oi:"占总持仓",pctl:"近一年位置",
+ high:"接近一年最高",low:"接近一年最低",mid:"中间区域",cotAsof:"持仓日期"},
+en:{title:"EURUSD Pre-open Reference",
+ s1:"1. Market view on USD and EUR",s1sub:"Auto-updated each trading day",
+ s1note:"Derived from the gap between 6-month and 2-year government yields and the policy rate. A rough directional reference, not rate-move probabilities. A hawkish label is common, so focus on the 5-day change and the USD vs EUR comparison.",
+ s2:"2. Rates, unemployment, CPI",s2sub:"Released monthly; shows latest and previous reading",
+ s3:"3. Key news (links)",s3sub:"Tap to open",gCal:"Economic calendar",gNews:"News",gOff:"Official",
+ l1:"Release times, forecasts, actuals",l2:"With impact filter",l3:"FX headlines and commentary",l4:"Reuters FX",l5:"Press releases and statements",l6:"Meeting schedule",l7:"ECB press releases",l8:"NFP and CPI release schedule",l9:"Eurozone release schedule",
+ s4:"4. Big-money positioning (CFTC, Euro FX futures)",s4note:"Published Fridays with positions as of the prior Tuesday, so it lags about 3 to 10 days. Use for background only. Net long means bullish EUR vs USD. Readings near the 1-year high or low mean crowded positioning, raising trend-continuation risk.",
+ policy:"Policy rate",y6:"6M yield",y2:"2Y yield",chg:"5-day change",asof:"Data date",
+ unemp:"Unemployment",cpi:"CPI YoY",core:"Core CPI YoY",prev:"prev",
+ lean:{hawkish:"Hawkish",neutral:"Neutral",dovish:"Dovish"},
+ rel:{"USD more hawkish than EUR":"USD more hawkish than EUR","USD more dovish than EUR":"USD more dovish than EUR","about balanced":"USD and EUR about balanced"},relH:"Relative: ",
+ updated:"Updated",stale:"Not updated for 4+ days, check GitHub Actions",err:"Cannot read data file",noData:"No data",
+ lev:"Hedge funds (leveraged)",am:"Asset managers",netLong:"Net long",netShort:"Net short",wk:"vs last week",oi:"of open interest",pctl:"1-year rank",
+ high:"Near 1-year high",low:"Near 1-year low",mid:"Mid-range",cotAsof:"Positions as of"}
+};
+let lang="zh",D=null,ERR=false;
+try{lang=localStorage.getItem("lang")||"zh"}catch(e){}
+const $=id=>document.getElementById(id), t=k=>T[lang][k];
+const sg=x=>(x>0?"+":"")+x;
+const f=(v,s)=>(v===null||v===undefined)?"—":v+(s||"");
+
+function render(){
+  document.documentElement.lang=lang==="zh"?"zh-CN":"en";
+  document.title=t("title");
+  document.querySelectorAll("[data-i]").forEach(e=>e.textContent=t(e.dataset.i));
+  document.querySelectorAll(".lang button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===lang));
+  // meta
+  let m="";
+  if(D&&D.updated){
+    const days=(Date.now()-new Date(D.updated).getTime())/864e5;
+    m=t("updated")+" "+new Date(D.updated).toLocaleString(lang==="zh"?"zh-CN":"en-GB",{timeZone:"Asia/Singapore",hour12:false,month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})+" SGT";
+    if(days>4)m+=" · "+t("stale");
+  }else if(ERR)m=t("err");
+  $("meta").textContent=m;
+
+  // 1
+  [["USD","usd"],["EUR","eur"]].forEach(([id,k])=>{
+    const d=D&&D[k],b=$("b"+id),box=$("d"+id);
+    if(!d||d.error){b.textContent=t("noData");b.className="big neut";box.innerHTML="";return;}
+    b.textContent=t("lean")[d.lean]+" "+sg(d.score_bp)+" bp";
+    b.className="big "+(d.lean==="hawkish"?"hawk":d.lean==="dovish"?"dove":"neut");
+    box.innerHTML=[[t("policy"),d.policy_rate+"%"],[t("y6"),d.short_yield_6m+"%"],[t("y2"),d.yield_2y+"%"],[t("chg"),sg(d.change_bp)+" bp"],[t("asof"),d.asof]]
+      .map(r=>"<span>"+r[0]+"</span><b>"+r[1]+"</b>").join("");
+  });
+  const rel=D&&D.relative;
+  $("rel").textContent=rel?t("relH")+t("rel")[rel.reading]+" ("+sg(rel.usd_minus_eur_bp)+" bp)":"";
+
+  // 2
+  const mu=D&&D.macro&&D.macro.usd, me=D&&D.macro&&D.macro.eur, pu=D&&D.usd, pe=D&&D.eur;
+  const cell=(o,suffix)=>(!o||o.value===null||o.value===undefined)?"—":
+    f(o.value,suffix)+"<small>"+t("prev")+" "+f(o.prev,suffix)+" · "+o.asof+"</small>";
+  const pol=(d)=>(d&&d.policy_rate!==undefined)?d.policy_rate+"%<small>"+d.asof+"</small>":"—";
+  const row=(label,a,b)=>"<tr><td>"+label+"</td><td>"+a+"</td><td>"+b+"</td></tr>";
+  $("macro").innerHTML=
+    row(t("policy"),pol(pu),pol(pe))+
+    row(t("unemp"),cell(mu&&mu.unemployment,"%"),cell(me&&me.unemployment,"%"))+
+    row(t("cpi"),cell(mu&&mu.cpi_yoy,"%"),cell(me&&me.cpi_yoy,"%"))+
+    row(t("core"),cell(mu&&mu.core_cpi_yoy,"%"),cell(me&&me.core_cpi_yoy,"%"));
+  const errs=[(mu&&mu.error)?"USD: "+mu.error:"",(me&&me.error)?"EUR: "+me.error:""].filter(Boolean).join(" | ");
+  $("macroNote").textContent=errs;
+
+  // 4
+  const c=D&&D.cot;
+  if(!c||c.error){$("cot").innerHTML="";$("cotSub").textContent=(c&&c.error)?c.error:t("noData");return;}
+  $("cotSub").textContent=t("cotAsof")+" "+c.asof;
+  const pos=p=>p>=90?t("high"):p<=10?t("low"):t("mid");
+  const card=(name,x)=>'<div class="card"><div class="cur">'+name+'</div><div class="big '+(x.net>=0?"dove":"hawk")+'">'+(x.net>=0?t("netLong"):t("netShort"))+" "+Math.abs(x.net).toLocaleString()+'</div><div class="rows">'+
+    "<span>"+t("wk")+"</span><b>"+(x.change===null?"—":(x.change>0?"+":"")+x.change.toLocaleString())+"</b>"+
+    "<span>"+t("oi")+"</span><b>"+x.pct_of_oi+"%</b>"+
+    "<span>"+t("pctl")+"</span><b>"+x.percentile_1y+"% · "+pos(x.percentile_1y)+"</b></div></div>";
+  $("cot").innerHTML=card(t("lev"),c.leveraged_funds)+card(t("am"),c.asset_managers);
+}
+document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{lang=b.dataset.lang;try{localStorage.setItem("lang",lang)}catch(e){}render()});
+fetch("data/lean.json?t="+Date.now()).then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>{D=j;render()}).catch(()=>{ERR=true;render()});
+render();
+</script>
+</body>
+</html>
