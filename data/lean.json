@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-17T08:27:09+00:00",
+  "updated": "2026-10-17T08:45:32+00:00",
   "usd": {
     "asof": "2026-10-15",
     "policy_rate": 3.88,
@@ -23,5 +23,58 @@
   "relative": {
     "usd_minus_eur_bp": 15.9,
     "reading": "USD more hawkish than EUR"
+  },
+  "macro": {
+    "usd": {
+      "unemployment": {
+        "value": 4.2,
+        "prev": 4.1,
+        "asof": "2026-09-01"
+      },
+      "cpi_yoy": {
+        "value": 3.72,
+        "prev": 3.35,
+        "asof": "2026-09-01"
+      },
+      "core_cpi_yoy": {
+        "value": 2.57,
+        "prev": 2.45,
+        "asof": "2026-09-01"
+      }
+    },
+    "eur": {
+      "unemployment": {
+        "value": 6.4,
+        "prev": 6.4,
+        "asof": "2026-08"
+      },
+      "cpi_yoy": {
+        "value": 1.9,
+        "prev": 2.1,
+        "asof": "2025-12"
+      },
+      "core_cpi_yoy": {
+        "value": 2.3,
+        "prev": 2.4,
+        "asof": "2025-12"
+      }
+    }
+  },
+  "cot": {
+    "asof": "2026-10-13",
+    "open_interest": 874541,
+    "weeks": 52,
+    "leveraged_funds": {
+      "net": -68001,
+      "change": -23740,
+      "pct_of_oi": -7.8,
+      "percentile_1y": 0
+    },
+    "asset_managers": {
+      "net": 199918,
+      "change": 10037,
+      "pct_of_oi": 22.9,
+      "percentile_1y": 2
+    }
   }
 }
