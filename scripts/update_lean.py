@@ -88,4 +88,4 @@ if "score_bp" in result["usd"] and "score_bp" in result["eur"]:
 os.makedirs("data", exist_ok=True)
 with open("data/lean.json", "w", encoding="utf-8") as f:
     json.dump(result, f, ensure_ascii=False, indent=2)
-print(json.dumps(result, ensure_ascii
+print(json.dumps(result, ensure_ascii=False, indent=2))
