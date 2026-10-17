@@ -157,8 +157,8 @@ except Exception as e:
 try:
     macro["eur"] = {
         "unemployment": latest(ecb("LFSI", "M.U2.S.UNEHRT.TOTAL0.15_74.T", 3)),
-        "cpi_yoy": latest(ecb("ICP", "M.U2.N.000000.4.ANR", 3)),
-        "core_cpi_yoy": latest(ecb("ICP", "M.U2.N.XEF000.4.ANR", 3)),
+        "cpi_yoy": latest(ecb("HICP", "M.U2.N.000000.4D0.ANR", 3)),
+        "core_cpi_yoy": latest(ecb("HICP", "M.U2.N.XEF000.4D0.ANR", 3)),
     }
 except Exception as e:
     macro["eur"] = {"error": str(e)}
