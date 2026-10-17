@@ -7,6 +7,7 @@ import urllib.request
 from datetime import datetime, timezone
 
 FRED_KEY = os.environ.get("FRED_API_KEY", "")
+COT_URL = "https://publicreporting.cftc.gov/resource/gpe5-46if.json?"
 
 
 def get(url):
@@ -21,9 +22,8 @@ def fred(series, n=12):
         "sort_order": "desc", "limit": n,
     })
     data = json.loads(get("https://api.stlouisfed.org/fred/series/observations?" + q))
-    out = [(o["date"], float(o["value"])) for o in data["observations"]
-           if o["value"] not in (".", "")]
-    return out  # newest first
+    return [(o["date"], float(o["value"])) for o in data["observations"]
+            if o["value"] not in (".", "")]  # newest first
 
 
 def ecb(flow, key, n=12):
@@ -61,8 +61,67 @@ def side(policy_series, yield_series):
     }
 
 
+def latest(series):
+    cur = series[0]
+    prev = series[1] if len(series) > 1 else None
+    return {"value": round(cur[1], 2),
+            "prev": round(prev[1], 2) if prev else None,
+            "asof": cur[0]}
+
+
+def yoy(series):
+    d = dict(series)
+
+    def at(date):
+        year, rest = date.split("-", 1)
+        ago = "%d-%s" % (int(year) - 1, rest)
+        if ago in d:
+            return round((d[date] / d[ago] - 1) * 100, 2)
+        return None
+
+    dates = [s[0] for s in series]
+    return {"value": at(dates[0]),
+            "prev": at(dates[1]) if len(dates) > 1 else None,
+            "asof": dates[0]}
+
+
+def cot():
+    q = urllib.parse.urlencode({
+        "$where": "market_and_exchange_names like 'EURO FX - CHICAGO%'",
+        "$order": "report_date_as_yyyy_mm_dd DESC",
+        "$limit": 52,
+    })
+    rows = json.loads(get(COT_URL + q))
+    if not rows:
+        raise ValueError("no COT rows returned")
+
+    def num(r, *names):
+        for n in names:
+            if n in r:
+                return float(r[n])
+        raise KeyError("missing field, available: " + ",".join(sorted(r)))
+
+    lev = [num(r, "lev_money_positions_long", "lev_money_positions_long_all")
+           - num(r, "lev_money_positions_short", "lev_money_positions_short_all") for r in rows]
+    am = [num(r, "asset_mgr_positions_long", "asset_mgr_positions_long_all")
+          - num(r, "asset_mgr_positions_short", "asset_mgr_positions_short_all") for r in rows]
+    oi = num(rows[0], "open_interest_all")
+
+    def block(vals):
+        pct = round(100.0 * sum(1 for x in vals if x < vals[0]) / len(vals))
+        return {"net": int(vals[0]),
+                "change": int(vals[0] - vals[1]) if len(vals) > 1 else None,
+                "pct_of_oi": round(100.0 * vals[0] / oi, 1),
+                "percentile_1y": pct}
+
+    return {"asof": rows[0]["report_date_as_yyyy_mm_dd"][:10],
+            "open_interest": int(oi), "weeks": len(rows),
+            "leveraged_funds": block(lev), "asset_managers": block(am)}
+
+
 result = {"updated": datetime.now(timezone.utc).isoformat(timespec="seconds")}
 
+# 1. Market direction
 try:
     result["usd"] = side(fred("DFF"), [fred("DGS6MO"), fred("DGS2")])
 except Exception as e:
@@ -84,6 +143,32 @@ if "score_bp" in result["usd"] and "score_bp" in result["eur"]:
         "reading": ("USD more hawkish than EUR" if diff >= 15 else
                     "USD more dovish than EUR" if diff <= -15 else "about balanced"),
     }
+
+# 2. Macro data
+macro = {}
+try:
+    macro["usd"] = {
+        "unemployment": latest(fred("UNRATE", 3)),
+        "cpi_yoy": yoy(fred("CPIAUCSL", 30)),
+        "core_cpi_yoy": yoy(fred("CPILFESL", 30)),
+    }
+except Exception as e:
+    macro["usd"] = {"error": str(e)}
+try:
+    macro["eur"] = {
+        "unemployment": latest(ecb("LFSI", "M.U2.S.UNEHRT.TOTAL0.15_74.T", 3)),
+        "cpi_yoy": latest(ecb("ICP", "M.U2.N.000000.4.ANR", 3)),
+        "core_cpi_yoy": latest(ecb("ICP", "M.U2.N.XEF000.4.ANR", 3)),
+    }
+except Exception as e:
+    macro["eur"] = {"error": str(e)}
+result["macro"] = macro
+
+# 4. Big money (COT, weekly)
+try:
+    result["cot"] = cot()
+except Exception as e:
+    result["cot"] = {"error": str(e)}
 
 os.makedirs("data", exist_ok=True)
 with open("data/lean.json", "w", encoding="utf-8") as f:
