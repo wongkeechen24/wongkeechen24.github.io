@@ -2,9 +2,10 @@ import csv
 import io
 import json
 import os
+import time
 import urllib.parse
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 FRED_KEY = os.environ.get("FRED_API_KEY", "")
 COT_URL = "https://publicreporting.cftc.gov/resource/gpe5-46if.json?"
@@ -119,6 +120,40 @@ def cot():
             "leveraged_funds": block(lev), "asset_managers": block(am)}
 
 
+def calendar():
+    now = datetime.now(timezone.utc)
+    events = []
+    seen = set()
+    for name in ("thisweek", "nextweek"):
+        try:
+            data = json.loads(get("https://nfs.faireconomy.media/ff_calendar_%s.json" % name))
+        except Exception:
+            if name == "thisweek":
+                raise
+            continue
+        for e in data:
+            if e.get("country") not in ("USD", "EUR") or e.get("impact") not in ("High", "Medium"):
+                continue
+            dt = datetime.fromisoformat(e["date"])
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            dt = dt.astimezone(timezone.utc)
+            if dt < now - timedelta(days=1) or dt > now + timedelta(days=14):
+                continue
+            key = (e.get("title", ""), e["country"], dt.isoformat(timespec="minutes"))
+            if key in seen:
+                continue
+            seen.add(key)
+            events.append({"title": e.get("title", ""), "currency": e["country"],
+                           "time": dt.isoformat(timespec="minutes"), "impact": e["impact"],
+                           "forecast": e.get("forecast") or "", "previous": e.get("previous") or ""})
+        time.sleep(2)
+    events.sort(key=lambda x: x["time"])
+    if not events:
+        raise ValueError("calendar feed returned no USD/EUR events")
+    return {"events": events}
+
+
 result = {"updated": datetime.now(timezone.utc).isoformat(timespec="seconds")}
 
 # 1. Market direction
@@ -163,6 +198,12 @@ try:
 except Exception as e:
     macro["eur"] = {"error": str(e)}
 result["macro"] = macro
+
+# 2b. Upcoming releases
+try:
+    result["calendar"] = calendar()
+except Exception as e:
+    result["calendar"] = {"error": str(e)}
 
 # 4. Big money (COT, weekly)
 try:
