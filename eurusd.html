@@ -105,7 +105,7 @@ zh:{title:"欧元美元 开盘前参考",
  unemp:"失业率",cpi:"CPI 年增率",core:"核心 CPI 年增率",prev:"上期",
  lean:{hawkish:"偏鹰",neutral:"中性",dovish:"偏鸽"},
  rel:{"USD more hawkish than EUR":"美元比欧元更偏鹰","USD more dovish than EUR":"美元比欧元更偏鸽","about balanced":"美元和欧元大致持平"},relH:"相对：",
- updated:"更新",stale:"超过4天没更新，请检查 GitHub Actions",err:"读不到数据文件",noData:"暂无数据",
+ old:"数据过旧",updated:"更新",stale:"超过4天没更新，请检查 GitHub Actions",err:"读不到数据文件",noData:"暂无数据",
  lev:"对冲基金（杠杆资金）",am:"资产管理机构",netLong:"净多",netShort:"净空",wk:"较上周",oi:"占总持仓",pctl:"近一年位置",
  high:"接近一年最高",low:"接近一年最低",mid:"中间区域",cotAsof:"持仓日期"},
 en:{title:"EURUSD Pre-open Reference",
@@ -119,7 +119,7 @@ en:{title:"EURUSD Pre-open Reference",
  unemp:"Unemployment",cpi:"CPI YoY",core:"Core CPI YoY",prev:"prev",
  lean:{hawkish:"Hawkish",neutral:"Neutral",dovish:"Dovish"},
  rel:{"USD more hawkish than EUR":"USD more hawkish than EUR","USD more dovish than EUR":"USD more dovish than EUR","about balanced":"USD and EUR about balanced"},relH:"Relative: ",
- updated:"Updated",stale:"Not updated for 4+ days, check GitHub Actions",err:"Cannot read data file",noData:"No data",
+ old:"outdated",updated:"Updated",stale:"Not updated for 4+ days, check GitHub Actions",err:"Cannot read data file",noData:"No data",
  lev:"Hedge funds (leveraged)",am:"Asset managers",netLong:"Net long",netShort:"Net short",wk:"vs last week",oi:"of open interest",pctl:"1-year rank",
  high:"Near 1-year high",low:"Near 1-year low",mid:"Mid-range",cotAsof:"Positions as of"}
 };
@@ -157,8 +157,9 @@ function render(){
 
   // 2
   const mu=D&&D.macro&&D.macro.usd, me=D&&D.macro&&D.macro.eur, pu=D&&D.usd, pe=D&&D.eur;
+  const old=a=>{const d=new Date(String(a).length===7?a+"-01":a);return (Date.now()-d.getTime())/864e5>100};
   const cell=(o,suffix)=>(!o||o.value===null||o.value===undefined)?"—":
-    f(o.value,suffix)+"<small>"+t("prev")+" "+f(o.prev,suffix)+" · "+o.asof+"</small>";
+    f(o.value,suffix)+"<small>"+t("prev")+" "+f(o.prev,suffix)+" · "+o.asof+(old(o.asof)?' · <span style="color:var(--warn)">'+t("old")+"</span>":"")+"</small>";
   const pol=(d)=>(d&&d.policy_rate!==undefined)?d.policy_rate+"%<small>"+d.asof+"</small>":"—";
   const row=(label,a,b)=>"<tr><td>"+label+"</td><td>"+a+"</td><td>"+b+"</td></tr>";
   $("macro").innerHTML=
