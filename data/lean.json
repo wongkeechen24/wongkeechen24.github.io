@@ -1,28 +1,28 @@
 {
-  "updated": "2026-10-17T08:55:44+00:00",
+  "updated": "2026-10-20T03:16:18+00:00",
   "usd": {
-    "asof": "2026-10-15",
+    "asof": "2026-10-16",
     "policy_rate": 3.88,
-    "short_yield_6m": 4.35,
-    "yield_2y": 4.77,
-    "score_bp": 68.0,
+    "short_yield_6m": 4.34,
+    "yield_2y": 4.74,
+    "score_bp": 66.0,
     "score_5d_ago_bp": 64.5,
-    "change_bp": 3.5,
+    "change_bp": 1.5,
     "lean": "hawkish"
   },
   "eur": {
-    "asof": "2026-10-15",
+    "asof": "2026-10-16",
     "policy_rate": 2.5,
-    "short_yield_6m": 2.841,
-    "yield_2y": 3.2,
-    "score_bp": 52.1,
-    "score_5d_ago_bp": 54.5,
-    "change_bp": -2.4,
+    "short_yield_6m": 2.867,
+    "yield_2y": 3.225,
+    "score_bp": 54.6,
+    "score_5d_ago_bp": 54.9,
+    "change_bp": -0.3,
     "lean": "hawkish"
   },
   "relative": {
-    "usd_minus_eur_bp": 15.9,
-    "reading": "USD more hawkish than EUR"
+    "usd_minus_eur_bp": 11.4,
+    "reading": "about balanced"
   },
   "macro": {
     "usd": {
@@ -43,22 +43,84 @@
       }
     },
     "eur": {
-      "unemployment": {
-        "value": 6.4,
-        "prev": 6.4,
-        "asof": "2026-08"
-      },
-      "cpi_yoy": {
-        "value": 3.8,
-        "prev": 3.2,
-        "asof": "2026-09"
-      },
-      "core_cpi_yoy": {
-        "value": 2.5,
-        "prev": 2.4,
-        "asof": "2026-09"
-      }
+      "error": "HTTP Error 504: Gateway Time-out"
     }
+  },
+  "calendar": {
+    "events": [
+      {
+        "title": "Unemployment Claims",
+        "currency": "USD",
+        "time": "2026-10-22T12:30+00:00",
+        "impact": "Medium",
+        "forecast": "200K",
+        "previous": "199K"
+      },
+      {
+        "title": "French Flash Manufacturing PMI",
+        "currency": "EUR",
+        "time": "2026-10-23T07:15+00:00",
+        "impact": "Medium",
+        "forecast": "50.6",
+        "previous": "50.3"
+      },
+      {
+        "title": "French Flash Services PMI",
+        "currency": "EUR",
+        "time": "2026-10-23T07:15+00:00",
+        "impact": "Medium",
+        "forecast": "50.8",
+        "previous": "51.4"
+      },
+      {
+        "title": "German Flash Manufacturing PMI",
+        "currency": "EUR",
+        "time": "2026-10-23T07:30+00:00",
+        "impact": "Medium",
+        "forecast": "53.5",
+        "previous": "53.8"
+      },
+      {
+        "title": "German Flash Services PMI",
+        "currency": "EUR",
+        "time": "2026-10-23T07:30+00:00",
+        "impact": "Medium",
+        "forecast": "52.6",
+        "previous": "52.9"
+      },
+      {
+        "title": "Flash Manufacturing PMI",
+        "currency": "USD",
+        "time": "2026-10-23T13:45+00:00",
+        "impact": "Medium",
+        "forecast": "55.5",
+        "previous": "57.0"
+      },
+      {
+        "title": "Flash Services PMI",
+        "currency": "USD",
+        "time": "2026-10-23T13:45+00:00",
+        "impact": "Medium",
+        "forecast": "58.0",
+        "previous": "58.7"
+      },
+      {
+        "title": "Revised UoM Consumer Sentiment",
+        "currency": "USD",
+        "time": "2026-10-23T14:00+00:00",
+        "impact": "Medium",
+        "forecast": "46.3",
+        "previous": "46.3"
+      },
+      {
+        "title": "Revised UoM Inflation Expectations",
+        "currency": "USD",
+        "time": "2026-10-23T14:00+00:00",
+        "impact": "Medium",
+        "forecast": "",
+        "previous": "4.7%"
+      }
+    ]
   },
   "cot": {
     "asof": "2026-10-13",
