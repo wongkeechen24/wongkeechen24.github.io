@@ -1,27 +1,27 @@
 {
-  "updated": "2026-10-20T03:16:18+00:00",
+  "updated": "2026-10-21T03:11:13+00:00",
   "usd": {
-    "asof": "2026-10-16",
+    "asof": "2026-10-19",
     "policy_rate": 3.88,
-    "short_yield_6m": 4.34,
-    "yield_2y": 4.74,
-    "score_bp": 66.0,
-    "score_5d_ago_bp": 64.5,
-    "change_bp": 1.5,
+    "short_yield_6m": 4.37,
+    "yield_2y": 4.77,
+    "score_bp": 69.0,
+    "score_5d_ago_bp": 68.0,
+    "change_bp": 1.0,
     "lean": "hawkish"
   },
   "eur": {
-    "asof": "2026-10-16",
+    "asof": "2026-10-19",
     "policy_rate": 2.5,
-    "short_yield_6m": 2.867,
-    "yield_2y": 3.225,
-    "score_bp": 54.6,
-    "score_5d_ago_bp": 54.9,
-    "change_bp": -0.3,
+    "short_yield_6m": 2.863,
+    "yield_2y": 3.264,
+    "score_bp": 56.4,
+    "score_5d_ago_bp": 56.8,
+    "change_bp": -0.4,
     "lean": "hawkish"
   },
   "relative": {
-    "usd_minus_eur_bp": 11.4,
+    "usd_minus_eur_bp": 12.6,
     "reading": "about balanced"
   },
   "macro": {
@@ -43,7 +43,21 @@
       }
     },
     "eur": {
-      "error": "HTTP Error 504: Gateway Time-out"
+      "unemployment": {
+        "value": 6.4,
+        "prev": 6.4,
+        "asof": "2026-08"
+      },
+      "cpi_yoy": {
+        "value": 3.8,
+        "prev": 3.2,
+        "asof": "2026-09"
+      },
+      "core_cpi_yoy": {
+        "value": 2.5,
+        "prev": 2.4,
+        "asof": "2026-09"
+      }
     }
   },
   "calendar": {
@@ -61,7 +75,7 @@
         "currency": "EUR",
         "time": "2026-10-23T07:15+00:00",
         "impact": "Medium",
-        "forecast": "50.6",
+        "forecast": "50.5",
         "previous": "50.3"
       },
       {
@@ -69,7 +83,7 @@
         "currency": "EUR",
         "time": "2026-10-23T07:15+00:00",
         "impact": "Medium",
-        "forecast": "50.8",
+        "forecast": "50.7",
         "previous": "51.4"
       },
       {
@@ -85,7 +99,7 @@
         "currency": "EUR",
         "time": "2026-10-23T07:30+00:00",
         "impact": "Medium",
-        "forecast": "52.6",
+        "forecast": "52.5",
         "previous": "52.9"
       },
       {
@@ -93,7 +107,7 @@
         "currency": "USD",
         "time": "2026-10-23T13:45+00:00",
         "impact": "Medium",
-        "forecast": "55.5",
+        "forecast": "55.4",
         "previous": "57.0"
       },
       {
@@ -101,7 +115,7 @@
         "currency": "USD",
         "time": "2026-10-23T13:45+00:00",
         "impact": "Medium",
-        "forecast": "58.0",
+        "forecast": "57.8",
         "previous": "58.7"
       },
       {
