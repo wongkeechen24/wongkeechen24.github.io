@@ -36,6 +36,12 @@ td small{display:block;color:var(--mute);font-size:12px}
 .links a{display:block;padding:10px 0;border-top:1px solid var(--line);color:var(--accent);text-decoration:none}
 .links a span{display:block;color:var(--mute);font-size:13px}
 .links h3{font-size:13px;color:var(--mute);margin:12px 0 0;font-weight:600}
+.axis{fill:var(--mute);font-size:9px}
+.grid{stroke:var(--line);stroke-width:.5}
+.zero{stroke:var(--mute);stroke-width:.8}
+.chg{stroke:var(--warn);stroke-width:.8;stroke-dasharray:2 2}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--mute);margin-top:6px}
+.legend b{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px}
 .today{padding:10px 12px;border-radius:8px;background:var(--bg);margin-bottom:12px;font-size:15px}
 .today.hot{border:2px solid var(--warn)}
 .ev{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;padding:9px 0;border-top:1px solid var(--line);font-size:14px}
@@ -67,6 +73,10 @@ td small{display:block;color:var(--mute);font-size:12px}
     <div class="card"><div class="cur">EUR · ECB</div><div class="big" id="bEUR"></div><div class="rows" id="dEUR"></div></div>
   </div>
   <div class="rel" id="rel"></div>
+  <h3 style="font-size:14px;margin:16px 0 4px" data-i="chartH"></h3>
+  <div id="chart"></div>
+  <div class="legend" id="legend"></div>
+  <p class="note" id="chartNote"></p>
   <p class="note" data-i="s1note"></p>
 </section>
 
@@ -119,6 +129,8 @@ zh:{title:"欧元美元 开盘前参考",
  lean:{hawkish:"偏鹰",neutral:"中性",dovish:"偏鸽"},
  rel:{"USD more hawkish than EUR":"美元比欧元更偏鹰","USD more dovish than EUR":"美元比欧元更偏鸽","about balanced":"美元和欧元大致持平"},relH:"相对：",
  old:"数据过旧",
+ chartH:"近 90 天走势（基点）",chUSD:"美元",chEUR:"欧元",chGap:"差距（美元−欧元）",chChg:"央行调息",chUp:"线往上 = 利率预期更偏鹰。差距往上 = 美元相对更偏鹰。每个交易日一个点。",
+ 
  calH:"未来 14 天重要数据（美元、欧元）",todayNone:"今天没有高影响数据。",todayHas:"今天有重要数据：",fc:"预期",pv:"前值",done:"已公布",hi:"高",md:"中",today:"今天",tmr:"明天",calErr:"读不到日历数据",calHint:"时间按新加坡时区。日历每个自动更新日读一次，预期值可能在数据公布前有变动。",
  updated:"更新",stale:"超过4天没更新，请检查 GitHub Actions",err:"读不到数据文件",noData:"暂无数据",
  lev:"对冲基金（杠杆资金）",am:"资产管理机构",netLong:"净多",netShort:"净空",wk:"较上周",oi:"占总持仓",pctl:"近一年位置",
@@ -135,6 +147,8 @@ en:{title:"EURUSD Pre-open Reference",
  lean:{hawkish:"Hawkish",neutral:"Neutral",dovish:"Dovish"},
  rel:{"USD more hawkish than EUR":"USD more hawkish than EUR","USD more dovish than EUR":"USD more dovish than EUR","about balanced":"USD and EUR about balanced"},relH:"Relative: ",
  old:"outdated",
+ chartH:"90-day trend (bp)",chUSD:"USD",chEUR:"EUR",chGap:"Gap (USD − EUR)",chChg:"Rate change",chUp:"Line up = rate expectations more hawkish. Gap up = USD relatively more hawkish. One point per trading day.",
+ 
  calH:"Upcoming key releases, next 14 days (USD, EUR)",todayNone:"No high-impact releases today.",todayHas:"Key releases today: ",fc:"Fcst",pv:"Prev",done:"Released",hi:"High",md:"Med",today:"Today",tmr:"Tomorrow",calErr:"Cannot read calendar data",calHint:"Times in Singapore time. The calendar refreshes once per update day, so forecasts may change before release.",
  updated:"Updated",stale:"Not updated for 4+ days, check GitHub Actions",err:"Cannot read data file",noData:"No data",
  lev:"Hedge funds (leveraged)",am:"Asset managers",netLong:"Net long",netShort:"Net short",wk:"vs last week",oi:"of open interest",pctl:"1-year rank",
@@ -164,6 +178,41 @@ function renderCal(){
   box.innerHTML="";$("calNote").textContent="";
 }
 
+function renderChart(){
+  const box=$("chart"), lg=$("legend"), nt=$("chartNote"), hs=D&&D.history;
+  if(!hs||hs.error||!hs.points||hs.points.length<2){box.innerHTML="";lg.innerHTML="";nt.textContent=(hs&&hs.error)?hs.error:"";return;}
+  const P=hs.points, W=360, H=190, L=34, R=8, T=10, B=22;
+  const vals=P.flatMap(p=>[p.usd,p.eur,p.gap,0]);
+  let lo=Math.min(...vals), hi=Math.max(...vals); const pad=Math.max(5,(hi-lo)*0.08); lo-=pad; hi+=pad;
+  const x=i=>L+(W-L-R)*i/(P.length-1), y=v=>T+(H-T-B)*(1-(v-lo)/(hi-lo));
+  const path=k=>P.map((p,i)=>(i?"L":"M")+x(i).toFixed(1)+" "+y(p[k]).toFixed(1)).join(" ");
+  const steps=[10,20,25,50,100,200]; const step=steps.find(s=>(hi-lo)/s<=5)||200;
+  let svg='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="'+t("chartH")+'">';
+  for(let v=Math.ceil(lo/step)*step;v<=hi;v+=step){
+    svg+='<line class="'+(v===0?"zero":"grid")+'" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v).toFixed(1)+'" y2="'+y(v).toFixed(1)+'"/>'+
+         '<text class="axis" x="'+(L-4)+'" y="'+(y(v)+3).toFixed(1)+'" text-anchor="end">'+v+'</text>';
+  }
+  const lab=i=>P[i].date.slice(5);
+  [[0,"start"],[Math.floor((P.length-1)/2),"middle"],[P.length-1,"end"]].forEach(([i,a])=>{
+    svg+='<text class="axis" x="'+x(i).toFixed(1)+'" y="'+(H-6)+'" text-anchor="'+a+'">'+lab(i)+'</text>';
+  });
+  (hs.policy_changes||[]).forEach(c=>{
+    const i=P.findIndex(p=>p.date>=c.date); if(i<0)return;
+    svg+='<line class="chg" x1="'+x(i).toFixed(1)+'" x2="'+x(i).toFixed(1)+'" y1="'+T+'" y2="'+(H-B)+'"/>';
+  });
+  svg+='<path d="'+path("gap")+'" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-dasharray="4 3"/>';
+  svg+='<path d="'+path("eur")+'" fill="none" stroke="#2f7fb8" stroke-width="1.8"/>';
+  svg+='<path d="'+path("usd")+'" fill="none" stroke="#c0562b" stroke-width="1.8"/>';
+  svg+="</svg>";
+  box.innerHTML=svg;
+  const last=P[P.length-1], sg2=v=>(v>0?"+":"")+v;
+  lg.innerHTML='<span><b style="background:#c0562b"></b>'+t("chUSD")+" "+sg2(last.usd)+'</span>'+
+    '<span><b style="background:#2f7fb8"></b>'+t("chEUR")+" "+sg2(last.eur)+'</span>'+
+    '<span><b style="background:var(--ink)"></b>'+t("chGap")+" "+sg2(last.gap)+'</span>'+
+    ((hs.policy_changes||[]).length?'<span><b style="background:var(--warn)"></b>'+t("chChg")+'</span>':"");
+  nt.textContent=t("chUp");
+}
+
 function render(){
   document.documentElement.lang=lang==="zh"?"zh-CN":"en";
   document.title=t("title");
@@ -190,6 +239,7 @@ function render(){
   const rel=D&&D.relative;
   $("rel").textContent=rel?t("relH")+t("rel")[rel.reading]+" ("+sg(rel.usd_minus_eur_bp)+" bp)":"";
 
+  renderChart();
   // 2
   const mu=D&&D.macro&&D.macro.usd, me=D&&D.macro&&D.macro.eur, pu=D&&D.usd, pe=D&&D.eur;
   const old=a=>{const d=new Date(String(a).length===7?a+"-01":a);return (Date.now()-d.getTime())/864e5>100};
