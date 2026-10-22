@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的专属无广告 YouTube 播放器</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h2 { margin-bottom: 15px; color: #e0e0e0; }
+        .control-box {
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            gap: 10px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background-color: #1e1e1e;
+            color: #fff;
+            font-size: 16px;
+        }
+        button {
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: none;
+            background-color: #ff0000;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background-color: #cc0000; }
+        /* 播放器容器 */
+        #player-container {
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 16 / 9;
+            background-color: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+        #youtube-player {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>🎬 清爽无广告播放器</h2>
+    
+    <div class="control-box">
+        <!-- 输入 YouTube 视频网址或 Video ID -->
+        <input type="text" id="videoInput" placeholder="粘贴 YouTube 网址 (如 https://youtu.be/xxxx)" />
+        <button onclick="loadVideo()">播放</button>
+    </div>
+
+    <div id="player-container">
+        <div id="youtube-player"></div>
+    </div>
+
+    <!-- 引入 YouTube 官方 IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        let player;
+
+        // 当 YouTube API 加载完成后自动调用此函数
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtube-player', {
+                height: '100%',
+                width: '100%',
+                videoId: 'dQw4w9WgXcQ', // 默认测试视频，可以换成你喜欢的
+                playerVars: {
+                    'autoplay': 0,      // 不自动播放
+                    'controls': 1,      // 显示控制条
+                    'rel': 0,           // 播放结束后不显示乱七八糟的推荐视频
+                    'modestbranding': 1 // 尽量隐藏 YouTube 标志
+                }
+            });
+        }
+
+        // 解析用户输入的网址并加载视频
+        function loadVideo() {
+            const inputVal = document.getElementById('videoInput').value.trim();
+            const videoId = extractVideoID(inputVal);
+            
+            if (videoId && player) {
+                player.loadVideoById(videoId);
+            } else {
+                alert('请输入正确的 YouTube 网址或 Video ID！');
+            }
+        }
+
+        // 智能提取各种格式 YouTube 链接中的 Video ID
+        function extractVideoID(url) {
+            let regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            let match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : (url.length === 11 ? url : null);
+        }
+    </script>
+</body>
+</html>
