@@ -154,6 +154,76 @@ def calendar():
     return {"events": events}
 
 
+def fred_range(series, start):
+    q = urllib.parse.urlencode({
+        "series_id": series, "api_key": FRED_KEY, "file_type": "json",
+        "observation_start": start, "sort_order": "asc", "limit": 1000,
+    })
+    data = json.loads(get("https://api.stlouisfed.org/fred/series/observations?" + q))
+    return [(o["date"], float(o["value"])) for o in data["observations"]
+            if o["value"] not in (".", "")]  # oldest first
+
+
+def ecb_range(flow, key, start):
+    url = ("https://data-api.ecb.europa.eu/service/data/%s/%s"
+           "?startPeriod=%s&format=csvdata" % (flow, key, start))
+    rows = csv.DictReader(io.StringIO(get(url)))
+    out = [(r["TIME_PERIOD"], float(r["OBS_VALUE"])) for r in rows if r.get("OBS_VALUE")]
+    out.sort()
+    return out  # oldest first
+
+
+def at_or_before(series, date):
+    val = None
+    for d, v in series:
+        if d <= date:
+            val = v
+        else:
+            break
+    if val is None and series:
+        val = series[0][1]
+    return val
+
+
+def history(days=90):
+    today = datetime.now(timezone.utc).date()
+    start = (today - timedelta(days=days)).isoformat()
+    dff = fred_range("DFF", (today - timedelta(days=days + 10)).isoformat())
+    y6 = dict(fred_range("DGS6MO", start))
+    y2 = dict(fred_range("DGS2", start))
+    usd = {}
+    for d in sorted(set(y6) & set(y2)):
+        usd[d] = round(((y6[d] + y2[d]) / 2 - at_or_before(dff, d)) * 100, 1)
+
+    dfr = sorted(ecb("FM", "B.U2.EUR.4F.KR.DFR.LEV", 400))
+    e6 = dict(ecb_range("YC", "B.U2.EUR.4F.G_N_C.SV_C_YM.SR_6M", start))
+    e2 = dict(ecb_range("YC", "B.U2.EUR.4F.G_N_C.SV_C_YM.SR_2Y", start))
+    eur = {}
+    for d in sorted(set(e6) & set(e2)):
+        eur[d] = round(((e6[d] + e2[d]) / 2 - at_or_before(dfr, d)) * 100, 1)
+
+    points = []
+    last_u = last_e = None
+    for d in sorted(set(usd) | set(eur)):
+        last_u = usd.get(d, last_u)
+        last_e = eur.get(d, last_e)
+        if last_u is None or last_e is None:
+            continue
+        points.append({"date": d, "usd": last_u, "eur": last_e, "gap": round(last_u - last_e, 1)})
+    if len(points) < 2:
+        raise ValueError("not enough history points")
+
+    changes = []
+    for name, ser in (("usd", dff), ("eur", dfr)):
+        prev = None
+        for d, v in ser:
+            if prev is not None and abs(v - prev) >= 0.2 and d >= start:
+                changes.append({"date": d, "side": name,
+                                "from": round(prev, 3), "to": round(v, 3)})
+            prev = v
+    return {"days": days, "points": points, "policy_changes": changes}
+
+
 result = {"updated": datetime.now(timezone.utc).isoformat(timespec="seconds")}
 
 # 1. Market direction
@@ -178,6 +248,12 @@ if "score_bp" in result["usd"] and "score_bp" in result["eur"]:
         "reading": ("USD more hawkish than EUR" if diff >= 15 else
                     "USD more dovish than EUR" if diff <= -15 else "about balanced"),
     }
+
+# 1b. 90-day history for the trend chart
+try:
+    result["history"] = history(90)
+except Exception as e:
+    result["history"] = {"error": str(e)}
 
 # 2. Macro data
 macro = {}
