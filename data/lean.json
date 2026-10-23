@@ -1,38 +1,32 @@
 {
-  "updated": "2026-10-22T09:19:47+00:00",
+  "updated": "2026-10-23T03:15:18+00:00",
   "usd": {
-    "asof": "2026-10-20",
+    "asof": "2026-10-21",
     "policy_rate": 3.88,
-    "short_yield_6m": 4.36,
-    "yield_2y": 4.79,
-    "score_bp": 69.5,
-    "score_5d_ago_bp": 68.5,
-    "change_bp": 1.0,
+    "short_yield_6m": 4.35,
+    "yield_2y": 4.81,
+    "score_bp": 70.0,
+    "score_5d_ago_bp": 71.5,
+    "change_bp": -1.5,
     "lean": "hawkish"
   },
   "eur": {
-    "asof": "2026-10-20",
+    "asof": "2026-10-21",
     "policy_rate": 2.5,
-    "short_yield_6m": 2.88,
-    "yield_2y": 3.276,
-    "score_bp": 57.8,
-    "score_5d_ago_bp": 57.6,
-    "change_bp": 0.2,
+    "short_yield_6m": 2.873,
+    "yield_2y": 3.268,
+    "score_bp": 57.1,
+    "score_5d_ago_bp": 57.5,
+    "change_bp": -0.5,
     "lean": "hawkish"
   },
   "relative": {
-    "usd_minus_eur_bp": 11.7,
+    "usd_minus_eur_bp": 12.9,
     "reading": "about balanced"
   },
   "history": {
     "days": 90,
     "points": [
-      {
-        "date": "2026-07-24",
-        "usd": 57.5,
-        "eur": 45.4,
-        "gap": 12.1
-      },
       {
         "date": "2026-07-27",
         "usd": 57.5,
@@ -404,6 +398,12 @@
         "usd": 69.5,
         "eur": 57.8,
         "gap": 11.7
+      },
+      {
+        "date": "2026-10-21",
+        "usd": 70.0,
+        "eur": 57.1,
+        "gap": 12.9
       }
     ],
     "policy_changes": [
