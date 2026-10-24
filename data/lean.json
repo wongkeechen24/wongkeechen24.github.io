@@ -1,27 +1,27 @@
 {
-  "updated": "2026-10-23T03:15:18+00:00",
+  "updated": "2026-10-24T03:09:01+00:00",
   "usd": {
-    "asof": "2026-10-21",
+    "asof": "2026-10-22",
     "policy_rate": 3.88,
-    "short_yield_6m": 4.35,
-    "yield_2y": 4.81,
-    "score_bp": 70.0,
-    "score_5d_ago_bp": 71.5,
-    "change_bp": -1.5,
+    "short_yield_6m": 4.29,
+    "yield_2y": 4.65,
+    "score_bp": 59.0,
+    "score_5d_ago_bp": 68.0,
+    "change_bp": -9.0,
     "lean": "hawkish"
   },
   "eur": {
-    "asof": "2026-10-21",
+    "asof": "2026-10-22",
     "policy_rate": 2.5,
-    "short_yield_6m": 2.873,
-    "yield_2y": 3.268,
-    "score_bp": 57.1,
-    "score_5d_ago_bp": 57.5,
-    "change_bp": -0.5,
+    "short_yield_6m": 2.878,
+    "yield_2y": 3.293,
+    "score_bp": 58.6,
+    "score_5d_ago_bp": 52.1,
+    "change_bp": 6.5,
     "lean": "hawkish"
   },
   "relative": {
-    "usd_minus_eur_bp": 12.9,
+    "usd_minus_eur_bp": 0.4,
     "reading": "about balanced"
   },
   "history": {
@@ -404,6 +404,12 @@
         "usd": 70.0,
         "eur": 57.1,
         "gap": 12.9
+      },
+      {
+        "date": "2026-10-22",
+        "usd": 59.0,
+        "eur": 58.6,
+        "gap": 0.4
       }
     ],
     "policy_changes": [
@@ -459,14 +465,6 @@
   },
   "calendar": {
     "events": [
-      {
-        "title": "Unemployment Claims",
-        "currency": "USD",
-        "time": "2026-10-22T12:30+00:00",
-        "impact": "Medium",
-        "forecast": "200K",
-        "previous": "199K"
-      },
       {
         "title": "French Flash Manufacturing PMI",
         "currency": "EUR",
@@ -534,19 +532,19 @@
     ]
   },
   "cot": {
-    "asof": "2026-10-13",
-    "open_interest": 874541,
+    "asof": "2026-10-20",
+    "open_interest": 877940,
     "weeks": 52,
     "leveraged_funds": {
-      "net": -68001,
-      "change": -23740,
+      "net": -68840,
+      "change": -839,
       "pct_of_oi": -7.8,
       "percentile_1y": 0
     },
     "asset_managers": {
-      "net": 199918,
-      "change": 10037,
-      "pct_of_oi": 22.9,
+      "net": 190421,
+      "change": -9497,
+      "pct_of_oi": 21.7,
       "percentile_1y": 2
     }
   }
