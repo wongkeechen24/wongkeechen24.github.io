@@ -17,6 +17,7 @@
   :root{ --green:#157A4C; --bg:#141A17; --panel:#1C2420; --ink:#EAF0EC; --muted:#93A39A; --line:#2E3A34; }
 }
 *{box-sizing:border-box}
+[hidden]{display:none !important}
 html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);
   font-family:system-ui,-apple-system,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
 #map{position:fixed;inset:0}
@@ -53,6 +54,8 @@ button.danger{background:var(--red);border-color:var(--red);color:#fff;font-weig
 .chip button{border:0;border-radius:0;min-height:36px;padding:0 12px}
 .chip button + button{padding:0 10px;color:var(--muted)}
 #sum{margin-bottom:10px;font-size:15px}
+.addr{display:block;font-size:14px;color:var(--muted)}
+.warn{color:var(--red);font-size:14px;margin:0 0 10px}
 #sum b{display:block;font-size:17px;margin-bottom:2px}
 #rem{font-size:15px;margin-bottom:10px}
 #credit{font-size:11px;color:var(--muted);margin-top:10px}
@@ -90,11 +93,17 @@ button.danger{background:var(--red);border-color:var(--red);color:#fff;font-weig
 
   <div id="routeBox" hidden>
     <div id="sum"></div>
-    <div class="row">
-      <button id="start" class="pri">开始导航</button>
-      <button id="sim">模拟行驶</button>
+    <div id="gpsNote" class="warn" hidden>还没有取得你的位置，暂时无法从你这里出发。点 ◎ 重试定位。</div>
+    <div class="row" id="rowPlace">
+      <button id="goRoute" class="pri">路线</button>
+      <button id="testRoute" hidden>测试起点</button>
       <button id="save">收藏</button>
       <button id="clear">取消</button>
+    </div>
+    <div class="row" id="rowRoute" hidden>
+      <button id="start" class="pri">开始导航</button>
+      <button id="sim">模拟行驶</button>
+      <button id="back">返回</button>
     </div>
   </div>
 
@@ -107,7 +116,7 @@ button.danger{background:var(--red);border-color:var(--red);color:#fff;font-weig
     </div>
   </div>
 
-  <div id="credit">地图数据 © OpenStreetMap 贡献者，路线 OSRM，地名搜索 Nominatim（v0.2）</div>
+  <div id="credit">地图数据 © OpenStreetMap 贡献者，路线 OSRM，地名搜索 Photon、Nominatim（v0.4）</div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -124,6 +133,7 @@ const store = {
 /* ---------- 状态 ---------- */
 let me = null, meMarker = null, accCircle = null, destMarker = null, routeLayer = null;
 let dest = null, route = null, coords = [], steps = [], stepIdx = 0;
+let fallbackFrom = null, geoWatch = null;
 let navigating = false, follow = true, voiceOn = true;
 let simTimer = null, lastReroute = 0, spoken = {}, wl = null;
 
@@ -131,7 +141,7 @@ let simTimer = null, lastReroute = 0, spoken = {}, wl = null;
 const map = L.map('map', {zoomControl:false, attributionControl:false}).setView([1.3521,103.8198], 12);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(map);
 map.on('dragstart', () => { follow = false; });
-map.on('click', e => { if(!navigating) setDest(e.latlng.lat, e.latlng.lng, '地图选点'); });
+map.on('click', e => { if(!navigating) setDest(e.latlng.lat, e.latlng.lng, '地图选点', '', false); });
 
 /* ---------- 工具函数 ---------- */
 function status(t){ $('#status').textContent = t || ''; }
@@ -217,16 +227,28 @@ function arrowOf(s){
 }
 
 /* ---------- 定位 ---------- */
+function geoMsg(e){
+  if(e.code === 1){
+    if(window.top !== window.self) return '此页面在预览窗口里，浏览器禁用了定位。请部署到GitHub Pages，用手机浏览器直接打开';
+    return '定位被拒绝。请在浏览器设置里允许本网站使用位置，并确认手机的定位服务已开启';
+  }
+  if(e.code === 2) return '暂时取不到位置，请到室外空旷处再试';
+  if(e.code === 3) return '定位超时，请点 ◎ 重试';
+  return e.message || '未知原因';
+}
+function onFix(p){
+  if(simTimer) return;
+  onPos({lat:p.coords.latitude, lng:p.coords.longitude, heading:p.coords.heading, speed:p.coords.speed, accuracy:p.coords.accuracy});
+}
 function startGPS(){
-  if(!navigator.geolocation){ status('此设备不支持定位，起点将使用地图中心'); return; }
-  navigator.geolocation.watchPosition(
-    p => { if(simTimer) return; onPos({lat:p.coords.latitude, lng:p.coords.longitude, heading:p.coords.heading, speed:p.coords.speed, accuracy:p.coords.accuracy}); },
-    e => status('定位失败：' + e.message + '。起点将使用地图中心'),
-    {enableHighAccuracy:true, maximumAge:1000, timeout:15000}
-  );
+  if(!window.isSecureContext){ status('当前页面不是HTTPS，浏览器会禁用定位。请用GitHub Pages的https网址打开'); return; }
+  if(!navigator.geolocation){ status('此浏览器不支持定位'); return; }
+  if(geoWatch !== null) return;
+  geoWatch = navigator.geolocation.watchPosition(onFix, e => status('定位失败：' + geoMsg(e)),
+    {enableHighAccuracy:true, maximumAge:1000, timeout:20000});
 }
 function onPos(p){
-  const first = !me; me = p;
+  const first = !me; me = p; if(first) refreshGpsNote();
   const ll = [p.lat, p.lng];
   if(!meMarker){
     meMarker = L.marker(ll, {icon:L.divIcon({className:'', html:'<div class="me"><div class="cone"></div></div>', iconSize:[22,22], iconAnchor:[11,11]}),
@@ -238,37 +260,100 @@ function onPos(p){
   }
   const cone = meMarker.getElement() && meMarker.getElement().querySelector('.cone');
   if(cone && p.heading != null && !isNaN(p.heading)) cone.style.transform = 'rotate(' + p.heading + 'deg)';
-  if(first || (navigating && follow)){
+  if((first && !dest) || (navigating && follow)){
     map.setView(ll, navigating ? Math.max(map.getZoom(),16) : Math.max(map.getZoom(),15), {animate:true});
   }
   if(navigating) progress(p);
 }
-function recenter(){ follow = true; if(me) map.setView([me.lat, me.lng], Math.max(map.getZoom(),16)); else status('还没有定位'); }
+function recenter(){
+  follow = true;
+  if(me){ map.setView([me.lat, me.lng], Math.max(map.getZoom(),16)); return; }
+  if(!window.isSecureContext){ status('当前页面不是HTTPS，浏览器会禁用定位。请用GitHub Pages的https网址打开'); return; }
+  if(!navigator.geolocation){ status('此浏览器不支持定位'); return; }
+  status('正在定位…');
+  navigator.geolocation.getCurrentPosition(onFix, e => status('定位失败：' + geoMsg(e)), {enableHighAccuracy:true, timeout:20000});
+  startGPS();
+}
 document.querySelectorAll('.loc').forEach(b => b.onclick = recenter);
 
-/* ---------- 搜索 ---------- */
-async function search(){
-  const q = $('#q').value.trim(); if(!q) return;
-  status('搜索中…'); $('#results').innerHTML = '';
-  try{
-    const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&accept-language=zh,en&countrycodes=my,sg&q=' + encodeURIComponent(q);
-    const list = await fetchJSON(url);
-    if(!list.length){ status('没有找到结果，换个关键词，或直接点地图'); return; }
-    status('');
-    const box = $('#results');
-    list.forEach(r => {
-      const parts = r.display_name.split(', '), name = r.name || parts[0];
-      const b = document.createElement('button'); b.className = 'item';
-      const t = document.createElement('b'); t.textContent = name;
-      const s = document.createElement('span'); s.textContent = parts.slice(1,4).join('，');
-      b.append(t, s); b.onclick = () => pick(+r.lat, +r.lon, name);
-      box.append(b);
-    });
-  }catch(e){ status('搜索失败：' + e.message); }
+/* ---------- 搜索：我的地点 + Photon（边打字提示） + Nominatim（后备） ---------- */
+let searchSeq = 0, searchTimer = null;
+function searchBias(){
+  if(me) return {lat:me.lat, lng:me.lng};
+  const c = map.getCenter(); return {lat:c.lat, lng:c.lng};
 }
-$('#go').onclick = search;
-$('#q').addEventListener('keydown', e => { if(e.key === 'Enter') search(); });
-function pick(lat,lng,name){ $('#results').innerHTML=''; setDest(lat,lng,name); }
+function mine(q){
+  const k = q.toLowerCase();
+  return (store.get('saved') || []).filter(p => p.name.toLowerCase().includes(k))
+    .map(p => ({name:p.name, addr:'我的地点', lat:p.lat, lng:p.lng}));
+}
+async function photon(q){
+  const b = searchBias();
+  const url = 'https://photon.komoot.io/api/?limit=15&lat=' + b.lat + '&lon=' + b.lng + '&q=' + encodeURIComponent(q);
+  const j = await fetchJSON(url);
+  return (j.features || [])
+    .filter(f => ['MY','SG'].includes(String((f.properties || {}).countrycode || '').toUpperCase()))
+    .slice(0, 8)
+    .map(f => {
+      const p = f.properties;
+      const street = p.street ? p.street + (p.housenumber ? ' ' + p.housenumber : '') : '';
+      const parts = [street, p.district || p.suburb || '', p.city || p.county || '', p.state || ''].filter(Boolean);
+      return {name: p.name || parts[0] || q, addr: parts.join('，'), lat: f.geometry.coordinates[1], lng: f.geometry.coordinates[0]};
+    });
+}
+async function nominatim(q){
+  const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&accept-language=zh,en&countrycodes=my,sg&q=' + encodeURIComponent(q);
+  const list = await fetchJSON(url);
+  return list.map(r => {
+    const parts = r.display_name.split(', ');
+    return {name: r.name || parts[0], addr: parts.slice(1,4).join('，'), lat: +r.lat, lng: +r.lon};
+  });
+}
+function renderResults(list){
+  const box = $('#results'); box.innerHTML = '';
+  const seen = new Set();
+  list.forEach(r => {
+    const key = r.name + '|' + r.lat.toFixed(3) + '|' + r.lng.toFixed(3);
+    if(seen.has(key)) return; seen.add(key);
+    const b = document.createElement('button'); b.className = 'item';
+    const t = document.createElement('b'); t.textContent = r.name;
+    const s = document.createElement('span'); s.textContent = r.addr;
+    b.append(t, s); b.onclick = () => pick(r.lat, r.lng, r.name, r.addr);
+    box.append(b);
+  });
+}
+async function search(final){
+  const q = $('#q').value.trim();
+  if(!q){ searchSeq++; $('#results').innerHTML = ''; status(''); return; }
+  if(!final && q.length < 2) return;
+  const seq = ++searchSeq;
+  if(final) status('搜索中…');
+  let list = mine(q), src = '';
+  try{
+    const a = await photon(q);
+    if(seq !== searchSeq) return;
+    list = list.concat(a); src = 'Photon';
+    if(final && !a.length){
+      const n = await nominatim(q);
+      if(seq !== searchSeq) return;
+      list = list.concat(n); src = 'Nominatim';
+    }
+  }catch(e){
+    if(seq !== searchSeq) return;
+    if(final){
+      try{ list = list.concat(await nominatim(q)); src = 'Nominatim'; }
+      catch(e2){ status('搜索失败：' + e2.message); return; }
+    }
+  }
+  if(seq !== searchSeq) return;
+  renderResults(list);
+  if(!list.length) status(final ? '没有找到。可以直接点地图选点，再按「收藏」加入我的地点' : '');
+  else status(final && src ? '结果来源：' + src : '');
+}
+$('#go').onclick = () => search(true);
+$('#q').addEventListener('keydown', e => { if(e.key === 'Enter') search(true); });
+$('#q').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => search(false), 400); });
+function pick(lat,lng,name,addr){ $('#results').innerHTML=''; setDest(lat,lng,name,addr); }
 
 /* ---------- 收藏 ---------- */
 function renderSaved(){
@@ -290,16 +375,44 @@ $('#save').onclick = () => {
 };
 
 /* ---------- 路线 ---------- */
-async function setDest(lat,lng,name){
-  dest = {lat, lng, name};
+function dropRoute(){
+  if(routeLayer){ routeLayer.remove(); routeLayer = null; }
+  route = null; coords = []; steps = [];
+}
+function refreshGpsNote(){
+  $('#gpsNote').hidden = !!me || !dest || !!route;
+  $('#testRoute').hidden = !!me || !!route;
+}
+function showPlaceCard(){
+  $('#sum').innerHTML = '';
+  const b = document.createElement('b'); b.textContent = dest.name;
+  const a = document.createElement('span'); a.className = 'addr';
+  a.textContent = dest.addr || (dest.lat.toFixed(5) + ', ' + dest.lng.toFixed(5));
+  $('#sum').append(b, a);
+  $('#searchBox').hidden = true; $('#routeBox').hidden = false;
+  $('#rowPlace').hidden = false; $('#rowRoute').hidden = true;
+  refreshGpsNote();
+}
+function setDest(lat,lng,name,addr,jump){
+  if(jump === undefined) jump = true;
+  if(!dest && !me) fallbackFrom = map.getCenter();
+  dest = {lat, lng, name, addr: addr || ''};
   const icon = L.divIcon({className:'', html:'<div class="pin"></div>', iconSize:[20,20], iconAnchor:[10,24]});
   if(destMarker) destMarker.setLatLng([lat,lng]); else destMarker = L.marker([lat,lng], {icon, interactive:false}).addTo(map);
-  try{ await getRoute(true); }catch(e){ status('路线规划失败：' + e.message); }
+  dropRoute();
+  if(jump) map.flyTo([lat,lng], Math.max(map.getZoom(), 17), {duration:0.8});
+  showPlaceCard();
 }
-async function getRoute(fit){
-  const from = me ? [me.lng, me.lat] : [map.getCenter().lng, map.getCenter().lat];
-  if(!me) status('还没有定位，起点使用地图中心');
-  else status('');
+async function doRoute(useFallback){
+  status('规划路线中…');
+  try{ await getRoute(true, useFallback); }catch(e){ status('路线规划失败：' + e.message); }
+}
+async function getRoute(fit, useFallback){
+  let from;
+  if(me && !useFallback) from = [me.lng, me.lat];
+  else if(fallbackFrom) from = [fallbackFrom.lng, fallbackFrom.lat];
+  else throw new Error('没有起点');
+  status(useFallback ? '测试模式：起点不是你的真实位置' : '');
   const url = 'https://router.project-osrm.org/route/v1/driving/' + from[0] + ',' + from[1] + ';' + dest.lng + ',' + dest.lat +
               '?overview=full&geometries=geojson&steps=true';
   const j = await fetchJSON(url);
@@ -332,16 +445,22 @@ async function getRoute(fit){
     d.textContent = '注意：' + w; d.style.color = 'var(--red)'; d.style.marginTop = '4px';
     $('#sum').append(d);
   });
-  if(!navigating){ $('#searchBox').hidden = true; $('#routeBox').hidden = false; }
+  if(!navigating){ $('#searchBox').hidden = true; $('#routeBox').hidden = false; $('#rowPlace').hidden = true; $('#rowRoute').hidden = false; $('#gpsNote').hidden = true; }
 }
 function clearRoute(){
   endNav(true);
   if(routeLayer){ routeLayer.remove(); routeLayer = null; }
   if(destMarker){ destMarker.remove(); destMarker = null; }
-  route = null; dest = null; coords = []; steps = [];
+  route = null; dest = null; coords = []; steps = []; fallbackFrom = null;
   $('#routeBox').hidden = true; $('#searchBox').hidden = false; status('');
 }
 $('#clear').onclick = clearRoute;
+$('#goRoute').onclick = () => {
+  if(!me){ status('还没有取得你的位置，无法从你这里出发。点 ◎ 重试定位'); return; }
+  doRoute(false);
+};
+$('#testRoute').onclick = () => doRoute(true);
+$('#back').onclick = () => { endNav(true); dropRoute(); if(dest) map.flyTo([dest.lat, dest.lng], 17); showPlaceCard(); };
 
 /* ---------- 导航 ---------- */
 async function wake(){ try{ wl = await navigator.wakeLock.request('screen'); }catch(e){} }
