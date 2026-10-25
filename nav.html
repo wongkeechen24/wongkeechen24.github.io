@@ -56,6 +56,9 @@ button.danger{background:var(--red);border-color:var(--red);color:#fff;font-weig
 #sum{margin-bottom:10px;font-size:15px}
 .addr{display:block;font-size:14px;color:var(--muted)}
 .warn{color:var(--red);font-size:14px;margin:0 0 10px}
+.addr.coord{font-size:12px}
+.addr.noteline{color:var(--red)}
+.plabel{font-weight:600;max-width:220px;white-space:normal;color:#101914}
 #sum b{display:block;font-size:17px;margin-bottom:2px}
 #rem{font-size:15px;margin-bottom:10px}
 #credit{font-size:11px;color:var(--muted);margin-top:10px}
@@ -116,7 +119,7 @@ button.danger{background:var(--red);border-color:var(--red);color:#fff;font-weig
     </div>
   </div>
 
-  <div id="credit">地图数据 © OpenStreetMap 贡献者，路线 OSRM，地名搜索 Photon、Nominatim（v0.4）</div>
+  <div id="credit">地图数据 © OpenStreetMap 贡献者，路线 OSRM，地名搜索 Photon、Nominatim（v0.4.1）</div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -141,7 +144,7 @@ let simTimer = null, lastReroute = 0, spoken = {}, wl = null;
 const map = L.map('map', {zoomControl:false, attributionControl:false}).setView([1.3521,103.8198], 12);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(map);
 map.on('dragstart', () => { follow = false; });
-map.on('click', e => { if(!navigating) setDest(e.latlng.lat, e.latlng.lng, '地图选点', '', false); });
+map.on('click', e => { if(navigating) return; setDest(e.latlng.lat, e.latlng.lng, '地图选点', '', false); describeSpot(e.latlng.lat, e.latlng.lng); });
 
 /* ---------- 工具函数 ---------- */
 function status(t){ $('#status').textContent = t || ''; }
@@ -276,6 +279,26 @@ function recenter(){
 }
 document.querySelectorAll('.loc').forEach(b => b.onclick = recenter);
 
+/* ---------- 地点类别（中文） ---------- */
+const CAT = {
+  'amenity:restaurant':'餐厅','amenity:cafe':'咖啡店','amenity:fast_food':'快餐店','amenity:food_court':'美食广场',
+  'amenity:pharmacy':'药房','amenity:clinic':'诊所','amenity:doctors':'诊所','amenity:dentist':'牙科','amenity:hospital':'医院',
+  'amenity:bank':'银行','amenity:atm':'提款机','amenity:fuel':'加油站','amenity:parking':'停车场',
+  'amenity:place_of_worship':'宗教场所','amenity:school':'学校','amenity:university':'大学','amenity:toilets':'洗手间',
+  'amenity:bus_station':'巴士站','shop:supermarket':'超市','shop:mall':'购物中心','shop:convenience':'便利店','shop:bakery':'面包店',
+  'tourism:hotel':'酒店','tourism:attraction':'景点','tourism:guest_house':'民宿','leisure:park':'公园','leisure:fitness_centre':'健身房',
+  'railway:station':'火车站','public_transport:station':'车站','aeroway:aerodrome':'机场','building:yes':'建筑',
+  'place:suburb':'区域','place:city':'城市','place:neighbourhood':'社区'
+};
+function catLabel(k, v){
+  if(!k || !v) return '';
+  if(CAT[k + ':' + v]) return CAT[k + ':' + v];
+  if(k === 'highway') return '道路';
+  if(k === 'shop') return '商店';
+  if(k === 'place') return '地区';
+  return String(v).replace(/_/g, ' ');
+}
+
 /* ---------- 搜索：我的地点 + Photon（边打字提示） + Nominatim（后备） ---------- */
 let searchSeq = 0, searchTimer = null;
 function searchBias(){
@@ -285,7 +308,7 @@ function searchBias(){
 function mine(q){
   const k = q.toLowerCase();
   return (store.get('saved') || []).filter(p => p.name.toLowerCase().includes(k))
-    .map(p => ({name:p.name, addr:'我的地点', lat:p.lat, lng:p.lng}));
+    .map(p => ({name:p.name, addr:p.addr || '', cat:'我的地点', lat:p.lat, lng:p.lng}));
 }
 async function photon(q){
   const b = searchBias();
@@ -297,8 +320,8 @@ async function photon(q){
     .map(f => {
       const p = f.properties;
       const street = p.street ? p.street + (p.housenumber ? ' ' + p.housenumber : '') : '';
-      const parts = [street, p.district || p.suburb || '', p.city || p.county || '', p.state || ''].filter(Boolean);
-      return {name: p.name || parts[0] || q, addr: parts.join('，'), lat: f.geometry.coordinates[1], lng: f.geometry.coordinates[0]};
+      const parts = [street, p.district || p.suburb || '', [p.postcode, p.city || p.county].filter(Boolean).join(' '), p.state || ''].filter(Boolean);
+      return {name: p.name || parts[0] || q, addr: parts.join('，'), cat: catLabel(p.osm_key, p.osm_value), lat: f.geometry.coordinates[1], lng: f.geometry.coordinates[0]};
     });
 }
 async function nominatim(q){
@@ -306,7 +329,7 @@ async function nominatim(q){
   const list = await fetchJSON(url);
   return list.map(r => {
     const parts = r.display_name.split(', ');
-    return {name: r.name || parts[0], addr: parts.slice(1,4).join('，'), lat: +r.lat, lng: +r.lon};
+    return {name: r.name || parts[0], addr: parts.slice(1,4).join('，'), cat: catLabel(r.category, r.type), lat: +r.lat, lng: +r.lon};
   });
 }
 function renderResults(list){
@@ -317,8 +340,8 @@ function renderResults(list){
     if(seen.has(key)) return; seen.add(key);
     const b = document.createElement('button'); b.className = 'item';
     const t = document.createElement('b'); t.textContent = r.name;
-    const s = document.createElement('span'); s.textContent = r.addr;
-    b.append(t, s); b.onclick = () => pick(r.lat, r.lng, r.name, r.addr);
+    const s = document.createElement('span'); s.textContent = (r.cat ? r.cat + '，' : '') + r.addr;
+    b.append(t, s); b.onclick = () => pick(r.lat, r.lng, r.name, r.addr, r.cat);
     box.append(b);
   });
 }
@@ -353,14 +376,14 @@ async function search(final){
 $('#go').onclick = () => search(true);
 $('#q').addEventListener('keydown', e => { if(e.key === 'Enter') search(true); });
 $('#q').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => search(false), 400); });
-function pick(lat,lng,name,addr){ $('#results').innerHTML=''; setDest(lat,lng,name,addr); }
+function pick(lat,lng,name,addr,cat){ $('#results').innerHTML=''; setDest(lat,lng,name,addr,true,cat); }
 
 /* ---------- 收藏 ---------- */
 function renderSaved(){
   const box = $('#saved'); box.innerHTML = '';
   (store.get('saved') || []).forEach((p,i) => {
     const c = document.createElement('span'); c.className = 'chip';
-    const b = document.createElement('button'); b.textContent = p.name; b.onclick = () => pick(p.lat, p.lng, p.name);
+    const b = document.createElement('button'); b.textContent = p.name; b.onclick = () => pick(p.lat, p.lng, p.name, p.addr || '', p.cat || '我的地点');
     const x = document.createElement('button'); x.textContent = '×'; x.setAttribute('aria-label','删除 ' + p.name);
     x.onclick = () => { const a = store.get('saved') || []; a.splice(i,1); store.set('saved', a); renderSaved(); };
     c.append(b, x); box.append(c);
@@ -369,9 +392,12 @@ function renderSaved(){
 $('#save').onclick = () => {
   if(!dest) return;
   const a = store.get('saved') || [];
-  const name = dest.name === '地图选点' ? (prompt('给这个地点起个名字') || '') : dest.name;
+  const input = prompt('地点名称', dest.name === '地图选点' ? '' : dest.name);
+  const name = input ? input.trim() : '';
   if(!name) return;
-  a.push({name, lat:dest.lat, lng:dest.lng}); store.set('saved', a); renderSaved(); status('已收藏：' + name);
+  a.push({name, lat:dest.lat, lng:dest.lng, addr:dest.addr || ''}); store.set('saved', a); renderSaved();
+  dest.name = name; dest.cat = '我的地点'; dest.note = ''; labelDest(); showPlaceCard();
+  status('已收藏：' + name);
 };
 
 /* ---------- 路线 ---------- */
@@ -384,21 +410,49 @@ function refreshGpsNote(){
   $('#testRoute').hidden = !!me || !!route;
 }
 function showPlaceCard(){
-  $('#sum').innerHTML = '';
-  const b = document.createElement('b'); b.textContent = dest.name;
-  const a = document.createElement('span'); a.className = 'addr';
-  a.textContent = dest.addr || (dest.lat.toFixed(5) + ', ' + dest.lng.toFixed(5));
-  $('#sum').append(b, a);
+  const box = $('#sum'); box.innerHTML = '';
+  const b = document.createElement('b'); b.textContent = dest.name; box.append(b);
+  const add = (t, cls) => {
+    if(!t) return;
+    const d = document.createElement('span'); d.className = 'addr' + (cls ? ' ' + cls : ''); d.textContent = t; box.append(d);
+  };
+  add(dest.cat);
+  add(dest.addr);
+  if(me) add('距离你 ' + fmtDist(hav(me, dest)));
+  add(dest.lat.toFixed(5) + ', ' + dest.lng.toFixed(5), 'coord');
+  add(dest.note, 'noteline');
   $('#searchBox').hidden = true; $('#routeBox').hidden = false;
   $('#rowPlace').hidden = false; $('#rowRoute').hidden = true;
   refreshGpsNote();
 }
-function setDest(lat,lng,name,addr,jump){
+function labelDest(){
+  if(!destMarker || !dest) return;
+  if(destMarker.getTooltip()) destMarker.unbindTooltip();
+  destMarker.bindTooltip(dest.name, {permanent:true, direction:'top', offset:[0,-24], className:'plabel'});
+}
+async function describeSpot(lat, lng){
+  const mark = dest;
+  try{
+    const r = await fetchJSON('https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&accept-language=zh,en&lat=' + lat + '&lon=' + lng);
+    if(dest !== mark) return;
+    if(r.error){ dest.note = 'OpenStreetMap 在这个位置没有资料。可按「收藏」命名，加入我的地点'; showPlaceCard(); return; }
+    const parts = (r.display_name || '').split(', ');
+    dest.name = r.name || (r.address && r.address.road) || parts[0] || '地图选点';
+    dest.cat = catLabel(r.category, r.type);
+    dest.addr = parts.slice(1, 5).join('，');
+    dest.note = '这是离你点的位置最近的资料，不一定就是你要找的那个地点';
+    labelDest(); showPlaceCard();
+  }catch(e){
+    if(dest === mark){ dest.note = '读取这个位置的资料失败：' + e.message; showPlaceCard(); }
+  }
+}
+function setDest(lat,lng,name,addr,jump,cat){
   if(jump === undefined) jump = true;
   if(!dest && !me) fallbackFrom = map.getCenter();
-  dest = {lat, lng, name, addr: addr || ''};
+  dest = {lat, lng, name, addr: addr || '', cat: cat || '', note: ''};
   const icon = L.divIcon({className:'', html:'<div class="pin"></div>', iconSize:[20,20], iconAnchor:[10,24]});
   if(destMarker) destMarker.setLatLng([lat,lng]); else destMarker = L.marker([lat,lng], {icon, interactive:false}).addTo(map);
+  labelDest();
   dropRoute();
   if(jump) map.flyTo([lat,lng], Math.max(map.getZoom(), 17), {duration:0.8});
   showPlaceCard();
