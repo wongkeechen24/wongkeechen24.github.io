@@ -35,10 +35,7 @@
             color: #fff;
             font-size: 15px;
         }
-        input[type="file"] {
-            margin-top: 6px;
-            color: #cbd5e1;
-        }
+        input[type="file"] { margin-top: 6px; color: #cbd5e1; }
         button {
             width: 100%;
             padding: 14px;
@@ -87,31 +84,31 @@
     <label>2. App 名称：</label>
     <input type="text" id="appName" placeholder="例如：我的工具" />
 
-    <label>3. 上传 App 图标 (手机相册/本地图片)：</label>
+    <label>3. 上传 App 图标：</label>
     <input type="file" id="iconFile" accept="image/*" />
 
-    <button onclick="generateApp()">🚀 转换并准备生成 App</button>
+    <button onclick="generateApp()">🚀 生成 App 访问链接</button>
 
     <div id="previewBox" class="preview-box">
-        <h3 style="text-align: center; color: #4ade80; margin-top: 0;">生成成功！</h3>
+        <h3 style="text-align: center; color: #4ade80; margin-top: 0;">配置就绪！</h3>
         <img id="iconPreview" class="app-icon-preview" src="" alt="App Icon" />
         <p style="text-align: center; font-weight: bold;" id="namePreview"></p>
         
         <div class="instruction">
-            <p><strong>如何一步安装到手机：</strong></p>
+            <p><strong>如何体验和安装：</strong></p>
             <ol>
-                <li>点击下方按钮打开生成的专属全屏网页。</li>
-                <li>在手机浏览器菜单中，选择 <strong>“添加到主屏幕”</strong> 或 <strong>“安装应用”</strong>。</li>
-                <li>完成！桌面上就会出现该网站的独立全屏 App 图标！</li>
+                <li>点击下方按钮，直接安全跳转到目标网址。</li>
+                <li>在手机浏览器菜单（右上角三个点）中，点击 <strong>“添加到主屏幕”</strong>。</li>
+                <li>即可在桌面生成独立 App 图标！</li>
             </ol>
         </div>
 
-        <button style="background-color: #16a34a;" onclick="launchApp()">打开并安装 App 窗口</button>
+        <button style="background-color: #16a34a;" onclick="launchApp()">🔗 直接打开目标网址</button>
     </div>
 </div>
 
 <script>
-    let generatedData = null;
+    let targetWebsite = "";
 
     function generateApp() {
         const url = document.getElementById('targetUrl').value.trim();
@@ -127,56 +124,29 @@
             return;
         }
 
-        // 处理图标上传
+        targetWebsite = url;
+
         if (fileInput.files && fileInput.files[0]) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                finishGeneration(url, name, e.target.result);
+                showPreview(name, e.target.result);
             };
             reader.readAsDataURL(fileInput.files[0]);
         } else {
-            // 如果没上传，给个默认图标
-            finishGeneration(url, name, 'https://img.icons8.com/color/96/globe--v1.png');
+            showPreview(name, 'https://img.icons8.com/color/96/globe--v1.png');
         }
     }
 
-    function finishGeneration(url, name, iconBase64) {
-        generatedData = { url, name, icon: iconBase64 };
-
-        // 更新预览展示
+    function showPreview(name, iconBase64) {
         document.getElementById('iconPreview').src = iconBase64;
         document.getElementById('namePreview').innerText = name;
         document.getElementById('previewBox').style.display = 'block';
     }
 
     function launchApp() {
-        if (!generatedData) return;
-        
-        // 动态构建包含全屏容器的页面
-        const htmlContent = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-                <title>${generatedData.name}</title>
-                <link rel="icon" href="${generatedData.icon}">
-                <meta name="apple-mobile-web-app-capable" content="yes">
-                <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-                <style>
-                    body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
-                    iframe { width: 100%; height: 100%; border: none; }
-                </style>
-            </head>
-            <body>
-                <iframe src="${generatedData.url}" allow="autoplay; camera; microphone; geolocation"></iframe>
-            </body>
-            </html>
-        `;
-
-        const blob = new Blob([htmlContent], { type: 'text/html' });
-        const blobUrl = URL.createObjectURL(blob);
-        window.open(blobUrl, '_blank');
+        if (!targetWebsite) return;
+        // 直接安全跳转到目标网页，避免浏览器拦截虚假的 blob 页面
+        window.open(targetWebsite, '_blank');
     }
 </script>
 
