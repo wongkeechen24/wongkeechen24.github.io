@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>万能网页转 App 生成器</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .card {
+            background-color: #1e293b;
+            padding: 24px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        h2 { text-align: center; color: #38bdf8; margin-top: 0; }
+        label { display: block; margin-top: 15px; font-weight: 600; color: #94a3b8; }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 6px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background-color: #0f172a;
+            color: #fff;
+            font-size: 15px;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 24px;
+            border-radius: 8px;
+            border: none;
+            background-color: #0284c7;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover { background-color: #0369a1; }
+        .preview-box {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #0f172a;
+            border-radius: 8px;
+            display: none;
+        }
+        .app-icon-preview {
+            width: 64px;
+            height: 64px;
+            border-radius: 14px;
+            margin: 10px auto;
+            display: block;
+            background-color: #334155;
+            object-fit: cover;
+        }
+        .instruction {
+            font-size: 13px;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>📱 万能网页转 App 工具</h2>
+    
+    <label>1. 目标网站 URL (任意网址)：</label>
+    <input type="url" id="targetUrl" placeholder="https://..." value="https://" />
+    
+    <label>2. App 名称：</label>
+    <input type="text" id="appName" placeholder="例如：我的工具" />
+
+    <label>3. App 图标 URL (选填)：</label>
+    <input type="url" id="appIcon" placeholder="https://... (图片链接)" />
+
+    <button onclick="generateApp()">🚀 转换并准备生成 App</button>
+
+    <div id="previewBox" class="preview-box">
+        <h3 style="text-align: center; color: #4ade80; margin-top: 0;">生成成功！</h3>
+        <img id="iconPreview" class="app-icon-preview" src="" alt="App Icon" />
+        <p style="text-align: center; font-weight: bold;" id="namePreview"></p>
+        
+        <div class="instruction">
+            <p><strong>如何一步安装到手机：</strong></p>
+            <ol>
+                <li>点击下方按钮打开生成的专属全屏网页。</li>
+                <li>在手机浏览器菜单中，选择 <strong>“添加到主屏幕”</strong> 或 <strong>“安装应用”</strong>。</li>
+                <li>完成！桌面上就会出现该网站的独立全屏 App 图标！</li>
+            </ol>
+        </div>
+
+        <button style="background-color: #16a34a;" onclick="launchApp()">打开并安装 App 窗口</button>
+    </div>
+</div>
+
+<script>
+    let generatedData = null;
+
+    function generateApp() {
+        const url = document.getElementById('targetUrl').value.trim();
+        const name = document.getElementById('appName').value.trim();
+        const icon = document.getElementById('appIcon').value.trim() || 'https://img.icons8.com/color/96/globe--v1.png';
+
+        if (!url || url === 'https://') {
+            alert('请输入要转换的目标网址！');
+            return;
+        }
+        if (!name) {
+            alert('请输入 App 名称！');
+            return;
+        }
+
+        generatedData = { url, name, icon };
+
+        // 更新预览展示
+        document.getElementById('iconPreview').src = icon;
+        document.getElementById('namePreview').innerText = name;
+        document.getElementById('previewBox').style.display = 'block';
+    }
+
+    function launchApp() {
+        if (!generatedData) return;
+        
+        // 动态构建包含 Manifest 的全屏容器页面
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+                <title>${generatedData.name}</title>
+                <meta name="apple-mobile-web-app-capable" content="yes">
+                <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+                <style>
+                    body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+                    iframe { width: 100%; height: 100%; border: none; }
+                </style>
+            </head>
+            <body>
+                <iframe src="${generatedData.url}" allow="autoplay; camera; microphone; geolocation"></iframe>
+            </body>
+            </html>
+        `;
+
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const blobUrl = URL.createObjectURL(blob);
+        window.open(blobUrl, '_blank');
+    }
+</script>
+
+</body>
+</html>
