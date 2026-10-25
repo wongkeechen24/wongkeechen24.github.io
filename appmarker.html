@@ -25,7 +25,7 @@
         }
         h2 { text-align: center; color: #38bdf8; margin-top: 0; }
         label { display: block; margin-top: 15px; font-weight: 600; color: #94a3b8; }
-        input {
+        input[type="url"], input[type="text"] {
             width: 100%;
             padding: 12px;
             margin-top: 6px;
@@ -34,6 +34,10 @@
             background-color: #0f172a;
             color: #fff;
             font-size: 15px;
+        }
+        input[type="file"] {
+            margin-top: 6px;
+            color: #cbd5e1;
         }
         button {
             width: 100%;
@@ -83,8 +87,8 @@
     <label>2. App 名称：</label>
     <input type="text" id="appName" placeholder="例如：我的工具" />
 
-    <label>3. App 图标 URL (选填)：</label>
-    <input type="url" id="appIcon" placeholder="https://... (图片链接)" />
+    <label>3. 上传 App 图标 (手机相册/本地图片)：</label>
+    <input type="file" id="iconFile" accept="image/*" />
 
     <button onclick="generateApp()">🚀 转换并准备生成 App</button>
 
@@ -112,7 +116,7 @@
     function generateApp() {
         const url = document.getElementById('targetUrl').value.trim();
         const name = document.getElementById('appName').value.trim();
-        const icon = document.getElementById('appIcon').value.trim() || 'https://img.icons8.com/color/96/globe--v1.png';
+        const fileInput = document.getElementById('iconFile');
 
         if (!url || url === 'https://') {
             alert('请输入要转换的目标网址！');
@@ -123,10 +127,24 @@
             return;
         }
 
-        generatedData = { url, name, icon };
+        // 处理图标上传
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                finishGeneration(url, name, e.target.result);
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            // 如果没上传，给个默认图标
+            finishGeneration(url, name, 'https://img.icons8.com/color/96/globe--v1.png');
+        }
+    }
+
+    function finishGeneration(url, name, iconBase64) {
+        generatedData = { url, name, icon: iconBase64 };
 
         // 更新预览展示
-        document.getElementById('iconPreview').src = icon;
+        document.getElementById('iconPreview').src = iconBase64;
         document.getElementById('namePreview').innerText = name;
         document.getElementById('previewBox').style.display = 'block';
     }
@@ -134,7 +152,7 @@
     function launchApp() {
         if (!generatedData) return;
         
-        // 动态构建包含 Manifest 的全屏容器页面
+        // 动态构建包含全屏容器的页面
         const htmlContent = `
             <!DOCTYPE html>
             <html>
@@ -142,6 +160,7 @@
                 <meta charset="utf-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
                 <title>${generatedData.name}</title>
+                <link rel="icon" href="${generatedData.icon}">
                 <meta name="apple-mobile-web-app-capable" content="yes">
                 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
                 <style>
