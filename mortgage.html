@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>马来西亚房贷比较</title>
+<style>
+:root{
+  --bg:#eef1f3; --card:#ffffff; --ink:#14213d; --muted:#586374; --line:#d3dae1;
+  --track:#e1e7ec; --bar:#9fb0c2; --accent:#0f6e66; --accent-soft:#dbf0ed;
+  --warn:#8a5200; --warn-soft:#fbefd6;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#10161e; --card:#18212c; --ink:#e7ecf2; --muted:#9aa7b8; --line:#2a3644;
+    --track:#223040; --bar:#5b7189; --accent:#4cc3b5; --accent-soft:#16332f;
+    --warn:#f0b75a; --warn-soft:#3a2d12;
+  }
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  line-height:1.6; font-variant-numeric:tabular-nums;
+}
+main{max-width:640px; margin:0 auto; padding:20px 16px 56px}
+h1{font-size:1.5rem; margin:0 0 4px; letter-spacing:.01em}
+h2{font-size:1.1rem; margin:32px 0 8px}
+h3{font-size:.95rem; margin:18px 0 4px}
+p{margin:0 0 8px}
+.lede{color:var(--muted); margin-bottom:18px}
+
+.opr{background:var(--card); border:1px solid var(--line); border-left:5px solid var(--accent); padding:12px 14px; border-radius:6px}
+.opr .big{font-size:1.6rem; font-weight:700}
+.opr small{display:block; color:var(--muted)}
+.opr.warn{border-left-color:var(--warn); background:var(--warn-soft)}
+
+.inputs{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:16px}
+label{display:flex; flex-direction:column; gap:4px; font-size:.85rem; color:var(--muted)}
+input{
+  font:inherit; font-size:1rem; color:var(--ink); background:var(--card);
+  border:1px solid var(--line); border-radius:6px; padding:9px 10px; width:100%;
+}
+input:focus-visible,a:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.loanline{margin-top:10px; color:var(--muted); font-size:.9rem}
+
+.gap{font-weight:600}
+.rows{list-style:none; margin:8px 0 0; padding:0}
+.row{padding:14px 0; border-top:1px solid var(--line)}
+.row:last-child{border-bottom:1px solid var(--line)}
+.top{display:flex; justify-content:space-between; align-items:baseline; gap:8px}
+.name{font-weight:600}
+.pay{font-size:1.15rem; font-weight:700}
+.row.best .pay{color:var(--accent)}
+.bar{height:8px; background:var(--track); border-radius:4px; margin:8px 0}
+.bar span{display:block; height:100%; background:var(--bar); border-radius:4px; transition:width .25s}
+.row.best .bar span{background:var(--accent)}
+@media (prefers-reduced-motion: reduce){.bar span{transition:none}}
+.detail{font-size:.88rem; margin:0}
+.src{font-size:.8rem; color:var(--muted); margin:2px 0 0}
+.src a{color:inherit}
+.tag{display:inline-block; margin:6px 0 0; padding:3px 8px; font-size:.78rem; background:var(--warn-soft); color:var(--warn); border-radius:4px}
+
+table{width:100%; border-collapse:collapse; font-size:.9rem}
+th,td{padding:7px 4px; text-align:right; border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:600; color:var(--muted); font-size:.8rem}
+tr.now td{font-weight:700}
+
+.notes{background:var(--card); border:1px solid var(--line); border-radius:6px; padding:4px 14px 12px; margin-top:32px}
+.notes h2{margin-top:14px}
+.notes ul{margin:0; padding-left:1.2em}
+.notes li{margin-bottom:4px; font-size:.9rem}
+.err{color:var(--warn); font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <h1>马来西亚房贷比较</h1>
+  <p class="lede">输入房价、首付和年限，看各银行按公布的参考利率算出的月供。</p>
+
+  <section id="opr" class="opr" aria-live="polite">正在读取 OPR…</section>
+
+  <section class="inputs" aria-label="贷款条件">
+    <label>房价（RM）<input id="price" type="number" inputmode="numeric" value="500000" min="0" step="10000"></label>
+    <label>首付（%）<input id="dp" type="number" inputmode="decimal" value="10" min="0" max="95" step="1"></label>
+    <label>年限（年）<input id="yrs" type="number" inputmode="numeric" value="30" min="1" max="40" step="1"></label>
+  </section>
+  <p id="loan" class="loanline"></p>
+
+  <section aria-labelledby="h-res">
+    <h2 id="h-res">各银行月供</h2>
+    <p id="gap" class="gap"></p>
+    <ol id="rows" class="rows"></ol>
+  </section>
+
+  <section aria-labelledby="h-sens">
+    <h2 id="h-sens">OPR 变动对月供的影响</h2>
+    <p id="sens-for" class="loanline"></p>
+    <table id="sens"></table>
+  </section>
+
+  <section class="notes" aria-labelledby="h-notes">
+    <h2 id="h-notes">数据说明</h2>
+
+    <h3>已验证</h3>
+    <ul>
+      <li>OPR 来自 BNM 官方接口。2026-10-25 实测返回：2026-09-03 决议，维持 2.75%。之后每周一自动更新一次。</li>
+      <li>各银行参考利率是银行自己公布的数字，口径统一：RM350,000、30 年、无锁定期的标准房贷。每一行都附来源和发布日期。</li>
+      <li>BNM 接口里的银行利率表停在 2020-08-06，数字已过时，本页不使用。</li>
+    </ul>
+
+    <h3>假设，未验证</h3>
+    <ul>
+      <li>利差（参考利率减去 SBR）在签约后保持不变，OPR 变动时利率 = 新 OPR + 利差。这是对行业做法的理解，以你的合同条款为准。</li>
+      <li>银行发布数字之后有没有调整过利差，没有逐家核对。距今超过一年的数据会标出提醒。</li>
+      <li>AmBank 的数字来自 Bernama 对银行公告的报道，不是银行原文。</li>
+      <li>实际能拿到的利率取决于贷款额、信用、物业类型和锁定期。参考利率适合筛选银行，不是最终报价。</li>
+    </ul>
+
+    <h3>没有计入</h3>
+    <ul>
+      <li>印花税、律师费、MRTA 等保险，以及锁定期和提前还款的罚款。</li>
+      <li>月供用标准等额本息公式，按月计息。银行实际按日计息，差别很小。</li>
+    </ul>
+
+    <h3>没有列出的银行</h3>
+    <ul>
+      <li>CIMB、Public Bank、Hong Leong、Alliance、UOB、OCBC、Bank Islam、HSBC 等：还没找到各自最新公布的参考利率，所以没有显示。</li>
+    </ul>
+
+    <h3>银行利率怎么更新</h3>
+    <ul>
+      <li>银行这张表需要手动更新，OPR 变动或银行发布公告后改页面开头的 BANKS 列表即可。</li>
+    </ul>
+  </section>
+</main>
+
+<script>
+(function(){
+  // 每家银行：ielr = 银行公布的参考有效利率(%)，sbr = 发布当时的 SBR(%)，date = 生效日期
+  var BANKS = [
+    {name:"Maybank", ielr:3.90, sbr:2.75, date:"2025-07-11",
+     url:"https://www.maybank2u.com.my/maybank2u/malaysia/en/personal/rates/blr_rates.page", src:"银行官网利率页"},
+    {name:"AmBank", ielr:4.00, sbr:2.75, date:"2025-07-14",
+     url:"https://bernama.com/en/news.php/target='_blank'?id=2444090", src:"Bernama 报道转述银行公告"},
+    {name:"RHB", ielr:4.50, sbr:2.75, date:"2025-07-11",
+     url:"https://www.rhbgroup.com/-/media/Files/others/highlights/announcements/H20250710-2.pdf", src:"银行公告 PDF"},
+    {name:"Standard Chartered", ielr:4.60, sbr:2.75, date:"2025-07-16",
+     url:"https://www.sc.com/my/deposits/interest-rates", src:"银行官网利率页"}
+  ];
+
+  var $ = function(id){ return document.getElementById(id); };
+  var el = function(t, c, x){
+    var e = document.createElement(t);
+    if (c) e.className = c;
+    if (x !== undefined) e.textContent = x;
+    return e;
+  };
+  var rm = function(n){ return "RM " + Math.round(n).toLocaleString("en-US"); };
+  var pct = function(n){ return n.toFixed(2) + "%"; };
+  var OPR = null;
+
+  function pmt(P, annualPct, months){
+    var r = annualPct / 100 / 12;
+    if (r === 0) return P / months;
+    var f = Math.pow(1 + r, months);
+    return P * r * f / (f - 1);
+  }
+  function monthsSince(d){
+    return Math.floor((Date.now() - new Date(d + "T00:00:00Z").getTime()) / (30.44 * 86400000));
+  }
+  function baseOf(b){ return OPR ? OPR.opr : b.sbr; }
+  function rateOf(b, shift){
+    var spread = b.ielr - b.sbr;
+    return Math.round((baseOf(b) + (shift || 0) + spread) * 100) / 100;
+  }
+
+  function renderOpr(){
+    var box = $("opr");
+    box.textContent = "";
+    if (!OPR){
+      box.className = "opr warn";
+      box.appendChild(el("strong", null, "还没有 OPR 数据"));
+      box.appendChild(el("small", null, "到仓库的 Actions 页面运行一次 Update OPR。在此之前，页面暂按各银行发布时的利率显示。"));
+      return;
+    }
+    box.className = "opr";
+    box.appendChild(el("div", "big", "OPR " + pct(OPR.opr)));
+    var chg = (OPR.change_in_opr === 0) ? "无变动" : "有变动";
+    box.appendChild(el("small", null, "BNM " + OPR.decision_date + " 决议，" + chg + "。SBR 与 OPR 同步。"));
+    box.appendChild(el("small", null, "数据抓取于 " + String(OPR.fetched_at).slice(0, 10)));
+  }
+
+  function calc(){
+    var price = parseFloat($("price").value);
+    var dp = parseFloat($("dp").value);
+    var yrs = parseFloat($("yrs").value);
+    var rows = $("rows"), gap = $("gap"), loan = $("loan"), sens = $("sens");
+    rows.textContent = ""; sens.textContent = ""; gap.textContent = "";
+    $("sens-for").textContent = "";
+
+    if (!(price > 0) || !(dp >= 0 && dp < 100) || !(yrs >= 1 && yrs <= 40)){
+      loan.textContent = "";
+      var e = el("li", "err", "请输入房价 > 0、首付 0–99%、年限 1–40 年。");
+      rows.appendChild(e);
+      return;
+    }
+    var P = price * (1 - dp / 100);
+    var n = Math.round(yrs * 12);
+    loan.textContent = "贷款额 " + rm(P) + "，共 " + n + " 期";
+
+    var list = BANKS.map(function(b){
+      var rate = rateOf(b, 0);
+      var m = pmt(P, rate, n);
+      return {b:b, rate:rate, m:m, interest:m * n - P};
+    }).sort(function(a, c){ return a.m - c.m; });
+
+    var maxM = list[list.length - 1].m;
+    if (list.length > 1){
+      var d = maxM - list[0].m;
+      gap.textContent = "最低和最高相差 " + rm(d) + "/月，" + yrs + " 年累计约 " + rm(d * n) + "。";
+    }
+
+    list.forEach(function(x, i){
+      var b = x.b, spread = b.ielr - b.sbr;
+      var li = el("li", "row" + (i === 0 ? " best" : ""));
+      var top = el("div", "top");
+      top.appendChild(el("span", "name", b.name));
+      top.appendChild(el("span", "pay", rm(x.m) + "/月"));
+      li.appendChild(top);
+
+      var bar = el("div", "bar");
+      var fill = el("span");
+      fill.style.width = (x.m / maxM * 100).toFixed(1) + "%";
+      bar.appendChild(fill);
+      li.appendChild(bar);
+
+      li.appendChild(el("p", "detail",
+        "利率 " + pct(x.rate) + "（" + pct(baseOf(b)) + " + 利差 " + pct(spread) + "），总利息 " + rm(x.interest)));
+
+      var s = el("p", "src");
+      s.appendChild(document.createTextNode("参考利率发布于 " + b.date + "，来源："));
+      var a = el("a", null, b.src);
+      a.href = b.url; a.target = "_blank"; a.rel = "noopener";
+      s.appendChild(a);
+      li.appendChild(s);
+
+      var age = monthsSince(b.date);
+      if (age >= 12){
+        li.appendChild(el("p", "tag", "数据距今约 " + age + " 个月，银行可能已调整利差，请到官网核对"));
+      }
+      if (OPR && OPR.opr !== b.sbr){
+        li.appendChild(el("p", "tag", "OPR 自发布后已从 " + pct(b.sbr) + " 变为 " + pct(OPR.opr) + "，此行为按 OPR + 利差推算"));
+      }
+      if (!OPR){
+        li.appendChild(el("p", "tag", "未取得 OPR，按发布时利率显示"));
+      }
+      rows.appendChild(li);
+    });
+
+    // OPR 变动敏感度：以当前月供最低的银行为例
+    var best = list[0];
+    $("sens-for").textContent = "以 " + best.b.name + " 为例，假设利差不变。";
+    var head = el("tr");
+    ["情景", "利率", "月供", "比现在"].forEach(function(h){ head.appendChild(el("th", null, h)); });
+    sens.appendChild(head);
+    [-0.5, -0.25, 0, 0.25, 0.5].forEach(function(sh){
+      var r = rateOf(best.b, sh);
+      var m = pmt(P, r, n);
+      var diff = m - best.m;
+      var tr = el("tr", sh === 0 ? "now" : "");
+      var label = sh === 0 ? "现在" : "OPR " + (sh > 0 ? "+" : "−") + Math.abs(sh).toFixed(2);
+      var delta = sh === 0 ? "—" : (diff > 0 ? "+" : "−") + rm(Math.abs(diff));
+      [label, pct(r), rm(m), delta].forEach(function(t){ tr.appendChild(el("td", null, t)); });
+      sens.appendChild(tr);
+    });
+  }
+
+  ["price", "dp", "yrs"].forEach(function(id){ $(id).addEventListener("input", calc); });
+
+  fetch("data/opr.json", {cache: "no-store"})
+    .then(function(r){ if (!r.ok) throw new Error("no opr"); return r.json(); })
+    .then(function(j){ if (typeof j.opr === "number") OPR = j; })
+    .catch(function(){ OPR = null; })
+    .then(function(){ renderOpr(); calc(); });
+})();
+</script>
+</body>
+</html>
