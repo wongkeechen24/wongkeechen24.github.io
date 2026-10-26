@@ -73,6 +73,10 @@ tr.now td{font-weight:700}
 .notes ul{margin:0; padding-left:1.2em}
 .notes li{margin-bottom:4px; font-size:.9rem}
 .err{color:var(--warn); font-weight:600}
+.pending{list-style:none; margin:8px 0 0; padding:0}
+.pending li{padding:12px 0; border-top:1px solid var(--line)}
+.pending li:last-child{border-bottom:1px solid var(--line)}
+.pending label{margin-top:8px; max-width:340px}
 </style>
 </head>
 <body>
@@ -95,6 +99,12 @@ tr.now td{font-weight:700}
     <ol id="rows" class="rows"></ol>
   </section>
 
+  <section aria-labelledby="h-pend">
+    <h2 id="h-pend">待核对的银行</h2>
+    <p class="loanline">这几家我没读到最新公布的数字，所以不替你填。到官网看到后，把参考有效利率填进来，就会加入上面的排名。</p>
+    <ul id="pending" class="pending"></ul>
+  </section>
+
   <section aria-labelledby="h-sens">
     <h2 id="h-sens">OPR 变动对月供的影响</h2>
     <p id="sens-for" class="loanline"></p>
@@ -113,8 +123,9 @@ tr.now td{font-weight:700}
 
     <h3>假设，未验证</h3>
     <ul>
-      <li>利差（参考利率减去 SBR）在签约后保持不变，OPR 变动时利率 = 新 OPR + 利差。这是对行业做法的理解，以你的合同条款为准。</li>
-      <li>银行发布数字之后有没有调整过利差，没有逐家核对。距今超过一年的数据会标出提醒。</li>
+      <li>已签合同的浮动利率贷款，利差通常固定，OPR 变动会按同样幅度传到利率，下面的变动表就是这样算的。这是对行业做法的理解，以你的合同条款为准。</li>
+      <li>新申请的利差不一定不变。Standard Chartered 官网显示，2025 年 7 月 OPR 从 3.00% 降到 2.75%，它的利差从 1.75% 升到 1.85%，参考利率只降了 0.15%。所以 OPR 变动后，新贷款请以银行最新公布的数字为准。</li>
+      <li>银行发布数字之后有没有再调整过利差，没有逐家核对。距今超过一年的数据会标出提醒。</li>
       <li>AmBank 的数字来自 Bernama 对银行公告的报道，不是银行原文。</li>
       <li>实际能拿到的利率取决于贷款额、信用、物业类型和锁定期。参考利率适合筛选银行，不是最终报价。</li>
     </ul>
@@ -125,9 +136,10 @@ tr.now td{font-weight:700}
       <li>月供用标准等额本息公式，按月计息。银行实际按日计息，差别很小。</li>
     </ul>
 
-    <h3>没有列出的银行</h3>
+    <h3>待核对和没有列出的银行</h3>
     <ul>
-      <li>CIMB、Public Bank、Hong Leong、Alliance、UOB、OCBC、Bank Islam、HSBC 等：还没找到各自最新公布的参考利率，所以没有显示。</li>
+      <li>CIMB、Public Bank、Hong Leong：我只找到 2023 年左右的旧数字（当时 OPR 是 3.00%），不使用。你到官网核对后把数字填进页面中部的输入框，就会加入排名；填入的数字页面不会核实，也不会保存，刷新后清空。</li>
+      <li>Alliance、UOB、OCBC、Bank Islam、HSBC 等：还没找到，也没有列出。</li>
     </ul>
 
     <h3>银行利率怎么更新</h3>
@@ -141,15 +153,31 @@ tr.now td{font-weight:700}
 (function(){
   // 每家银行：ielr = 银行公布的参考有效利率(%)，sbr = 发布当时的 SBR(%)，date = 生效日期
   var BANKS = [
-    {name:"Maybank", ielr:3.90, sbr:2.75, date:"2025-07-11",
-     url:"https://www.maybank2u.com.my/maybank2u/malaysia/en/personal/rates/blr_rates.page", src:"银行官网利率页"},
-    {name:"AmBank", ielr:4.00, sbr:2.75, date:"2025-07-14",
-     url:"https://bernama.com/en/news.php/target='_blank'?id=2444090", src:"Bernama 报道转述银行公告"},
-    {name:"RHB", ielr:4.50, sbr:2.75, date:"2025-07-11",
-     url:"https://www.rhbgroup.com/-/media/Files/others/highlights/announcements/H20250710-2.pdf", src:"银行公告 PDF"},
-    {name:"Standard Chartered", ielr:4.60, sbr:2.75, date:"2025-07-16",
-     url:"https://www.sc.com/my/deposits/interest-rates", src:"银行官网利率页"}
+    {name:"Maybank", ielr:3.90, sbr:2.75, date:"2025-07-11", src:"银行官网利率页",
+     url:"https://www.maybank2u.com.my/maybank2u/malaysia/en/personal/rates/blr_rates.page",
+     official:{url:"https://www.maybank2u.com.my/maybank2u/malaysia/en/personal/rates/blr_rates.page", label:"银行官网利率页"}},
+    {name:"AmBank", ielr:4.00, sbr:2.75, date:"2025-07-14", src:"Bernama 报道转述银行公告",
+     url:"https://bernama.com/en/news.php/target='_blank'?id=2444090",
+     official:null},
+    {name:"RHB", ielr:4.50, sbr:2.75, date:"2025-07-11", src:"银行公告 PDF",
+     url:"https://www.rhbgroup.com/-/media/Files/others/highlights/announcements/H20250710-2.pdf",
+     official:{url:"https://www.rhbgroup.com/-/media/Files/others/highlights/announcements/H20250710-2.pdf", label:"银行公告 PDF（2025 年 7 月）"}},
+    {name:"Standard Chartered", ielr:4.60, sbr:2.75, date:"2025-07-16", src:"银行官网利率页",
+     url:"https://www.sc.com/my/deposits/interest-rates",
+     official:{url:"https://www.sc.com/my/deposits/interest-rates", label:"银行官网利率页"}}
   ];
+
+  // 没读到最新公布数字的银行：只给官网入口，数字由你从官网读到后自己填
+  var PENDING = [
+    {name:"CIMB", note:"官网页面列出 SBR/BR/BLR，我没读到房贷参考有效利率。",
+     official:{url:"https://www.cimb.com.my/en/personal/help-support/rates-charges/CIMB-Base-Rate-Base-Lending-Rates.html", label:"官网 SBR/BR 利率页"}},
+    {name:"Public Bank", note:"只找到 2023 年左右的旧数字，不用；也没找到具体利率页。",
+     official:{url:"https://www.pbebank.com", label:"官网首页（需自己找利率页）"}},
+    {name:"Hong Leong", note:"官网公告页我没完整读到房贷参考有效利率。",
+     official:{url:"https://www.hlb.com.my/en/personal-banking/news-updates/hlb-hlisb-update-sbr-br-ibr-blr-ifr-14-july-2025.html", label:"官网 2025 年 7 月利率公告"}}
+  ];
+  var userRates = {};
+
 
   var $ = function(id){ return document.getElementById(id); };
   var el = function(t, c, x){
@@ -173,8 +201,49 @@ tr.now td{font-weight:700}
   }
   function baseOf(b){ return OPR ? OPR.opr : b.sbr; }
   function rateOf(b, shift){
+    if (b.user) return Math.round((b.ielr + (shift || 0)) * 100) / 100;
     var spread = b.ielr - b.sbr;
     return Math.round((baseOf(b) + (shift || 0) + spread) * 100) / 100;
+  }
+
+  function allBanks(){
+    var out = BANKS.slice();
+    PENDING.forEach(function(p){
+      var v = userRates[p.name];
+      if (v > 0) out.push({name:p.name, ielr:v, user:true, official:p.official});
+    });
+    return out;
+  }
+  function officialLine(o){
+    var p = el("p", "src");
+    if (!o){ p.textContent = "官网核对：没有找到这家银行官网上的利率页面"; return p; }
+    p.appendChild(document.createTextNode("官网核对最新利率："));
+    var a = el("a", null, o.label);
+    a.href = o.url; a.target = "_blank"; a.rel = "noopener";
+    p.appendChild(a);
+    return p;
+  }
+  function renderPending(){
+    var ul = $("pending");
+    ul.textContent = "";
+    PENDING.forEach(function(p){
+      var li = el("li");
+      li.appendChild(el("div", "name", p.name));
+      li.appendChild(el("p", "detail", p.note));
+      li.appendChild(officialLine(p.official));
+      var lab = el("label", null, "在官网看到的参考有效利率（%），填了就加入排名");
+      var inp = el("input");
+      inp.type = "number"; inp.step = "0.01"; inp.min = "0"; inp.max = "15";
+      inp.inputMode = "decimal"; inp.placeholder = "例如 4.20";
+      inp.addEventListener("input", function(){
+        var v = parseFloat(inp.value);
+        if (v > 0 && v < 15) userRates[p.name] = v; else delete userRates[p.name];
+        calc();
+      });
+      lab.appendChild(inp);
+      li.appendChild(lab);
+      ul.appendChild(li);
+    });
   }
 
   function renderOpr(){
@@ -211,7 +280,7 @@ tr.now td{font-weight:700}
     var n = Math.round(yrs * 12);
     loan.textContent = "贷款额 " + rm(P) + "，共 " + n + " 期";
 
-    var list = BANKS.map(function(b){
+    var list = allBanks().map(function(b){
       var rate = rateOf(b, 0);
       var m = pmt(P, rate, n);
       return {b:b, rate:rate, m:m, interest:m * n - P};
@@ -224,7 +293,7 @@ tr.now td{font-weight:700}
     }
 
     list.forEach(function(x, i){
-      var b = x.b, spread = b.ielr - b.sbr;
+      var b = x.b, spread = b.user ? 0 : b.ielr - b.sbr;
       var li = el("li", "row" + (i === 0 ? " best" : ""));
       var top = el("div", "top");
       top.appendChild(el("span", "name", b.name));
@@ -237,22 +306,31 @@ tr.now td{font-weight:700}
       bar.appendChild(fill);
       li.appendChild(bar);
 
+      if (b.user){
+        li.appendChild(el("p", "detail", "利率 " + pct(x.rate) + "（你从官网填写的数字），总利息 " + rm(x.interest)));
+        li.appendChild(officialLine(b.official));
+        li.appendChild(el("p", "tag", "这个利率是你自己填的，页面没有核实"));
+        rows.appendChild(li);
+        return;
+      }
+
       li.appendChild(el("p", "detail",
         "利率 " + pct(x.rate) + "（" + pct(baseOf(b)) + " + 利差 " + pct(spread) + "），总利息 " + rm(x.interest)));
 
       var s = el("p", "src");
-      s.appendChild(document.createTextNode("参考利率发布于 " + b.date + "，来源："));
+      s.appendChild(document.createTextNode("数字来源（发布于 " + b.date + "）："));
       var a = el("a", null, b.src);
       a.href = b.url; a.target = "_blank"; a.rel = "noopener";
       s.appendChild(a);
       li.appendChild(s);
+      li.appendChild(officialLine(b.official));
 
       var age = monthsSince(b.date);
       if (age >= 12){
         li.appendChild(el("p", "tag", "数据距今约 " + age + " 个月，银行可能已调整利差，请到官网核对"));
       }
       if (OPR && OPR.opr !== b.sbr){
-        li.appendChild(el("p", "tag", "OPR 自发布后已从 " + pct(b.sbr) + " 变为 " + pct(OPR.opr) + "，此行为按 OPR + 利差推算"));
+        li.appendChild(el("p", "tag", "OPR 自发布后已从 " + pct(b.sbr) + " 变为 " + pct(OPR.opr) + "，此行为按 OPR + 利差推算，银行可能同时调整了利差，请到官网核对"));
       }
       if (!OPR){
         li.appendChild(el("p", "tag", "未取得 OPR，按发布时利率显示"));
@@ -284,7 +362,7 @@ tr.now td{font-weight:700}
     .then(function(r){ if (!r.ok) throw new Error("no opr"); return r.json(); })
     .then(function(j){ if (typeof j.opr === "number") OPR = j; })
     .catch(function(){ OPR = null; })
-    .then(function(){ renderOpr(); calc(); });
+    .then(function(){ renderOpr(); renderPending(); calc(); });
 })();
 </script>
 </body>
