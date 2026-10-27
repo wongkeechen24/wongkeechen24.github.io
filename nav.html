@@ -165,7 +165,7 @@ function status(t){$('#status').textContent=t||'';}
 function fmtDist(m){if(m<1000)return Math.round(m)+' m';return (m/1000).toFixed(m<10000?1:0)+' km';}
 function hav(a,b){const R=6371000,toRad=x=>x*Math.PI/180;const dLat=toRad(b.lat-a.lat),dLon=toRad(b.lng-a.lng),lat1=toRad(a.lat),lat2=toRad(b.lat);const h=Math.sin(dLat/2)**2+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;return R*2*Math.asin(Math.sqrt(h));}
 function bearing(a,b){const toRad=x=>x*Math.PI/180,toDeg=x=>x*180/Math.PI;const y=Math.sin(toRad(b[1]-a[0]))*Math.cos(toRad(b[0]));const x=Math.cos(toRad(a[1]))*Math.sin(toRad(b[0]))-Math.sin(toRad(a[1]))*Math.cos(toRad(b[0]))*Math.cos(toRad(b[1]-a[0]));return (toDeg(Math.atan2(y,x))+360)%360;}
-function densify(cs,step){const out=[];for(let i=0;i<cs.length-1;i++){const a=cs[i],b=cs[i+1];const d=hav({lat:a[0],lng:a[1]},{lat:b[0],lng:b[1]});const n=Math.max(1,Math.round(d/step));for(let k=0;k<n;k++){const t=k/n;out.push([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t]);}}out.push(cs[cs.length-1]);return out;}
+function densify(cs,step){const out=[];for(let i=0;i<cs.length-1;i++){const a=cs[i],b=cs[i+1];const d=hav({lat:a[0],lng:a[1]},{lat:b[0],lng:b[1]});const n=Math.max(2,Math.round(d/step));for(let k=0;k<n;k++){const t=k/n;const smoothT=t*t*(3-2*t);out.push([a[0]+(b[0]-a[0])*smoothT,a[1]+(b[1]-a[1])*smoothT]);}}out.push(cs[cs.length-1]);return out;}
 function hhmm(d){return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});}
 function fetchJSON(u){return fetch(u).then(r=>{if(!r.ok) throw new Error('HTTP '+r.status);return r.json();});}
 function renderMe(p){if(!meMarker){const icon=L.divIcon({className:'',html:'<div class="me"></div>',iconSize:[20,20],iconAnchor:[10,10]});meMarker=L.marker([p.lat,p.lng],{icon}).addTo(map);accCircle=L.circle([p.lat,p.lng],{radius:p.acc||30,color:'#00F0FF',fillColor:'#00F0FF',fillOpacity:.08,weight:1}).addTo(map);}else{meMarker.setLatLng([p.lat,p.lng]);if(accCircle){accCircle.setLatLng([p.lat,p.lng]);accCircle.setRadius(p.acc||30);}}if(follow) map.setView([p.lat,p.lng],navigating?17:map.getZoom());$('#gpsAcc').textContent=p.acc?Math.round(p.acc)+'m':'--';$('#gpsSpd').textContent=p.speed?(p.speed*3.6).toFixed(0)+' km/h':'--';$('#gpsHdg').textContent=p.heading?Math.round(p.heading)+'°':'--';}
@@ -223,14 +223,25 @@ function buildPlaceCard(r){
   if(addr.suburb) tags.push('街区: '+addr.suburb);
   if(addr.road) tags.push('道路: '+addr.road);
   if(extra.capacity) tags.push('容量: '+extra.capacity);
+  const gmapUrl=`https://www.google.com/maps/search/?api=1&query=${r.lat},${r.lng}`;
+  const osmUrl=`https://www.openstreetmap.org/?mlat=${r.lat}&mlon=${r.lng}#map=19/${r.lat}/${r.lng}`;
   card.innerHTML=`<b>${r.name}</b>
     <div class="line">${r.addr}</div>
-    <div class="line coord" title="点击复制坐标">${r.lat.toFixed(6)}, ${r.lng.toFixed(6)} // OSM_ID:${r.osm_id||r.props.osm_id||'--'} // 点击复制</div>
-    <div class="tagRow">${tags.length?tags.map(t=>`<span class="tag">${t}</span>`).join(''):'<span class="tag" style="color:var(--muted)">NO_EXTRATAGS // 此地点在 OSM 上信息较少</span>'}</div>
-    <div style="margin-top:10px;display:flex;gap:6px">
-      <button class="pri" style="min-height:32px;font-size:10px" onclick="window.open('https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${r.lat},${r.lng}','_blank')">街景 STREET</button>
-      <button style="min-height:32px;font-size:10px" onclick="navigator.clipboard.writeText('${r.lat},${r.lng}').then(()=>{document.getElementById('status').textContent='COORD_COPIED';})">复制坐标</button>
+    <div class="line coord" title="点击复制坐标" onclick="navigator.clipboard.writeText('${r.lat},${r.lng}').then(()=>{document.getElementById('status').textContent='◍ COORD_COPIED // ${r.lat.toFixed(6)},${r.lng.toFixed(6)}';})">${r.lat.toFixed(6)}, ${r.lng.toFixed(6)} // OSM_ID:${r.osm_id||r.props.osm_id||'--'} // 点此复制</div>
+    <div class="tagRow">${tags.length?tags.map(t=>`<span class="tag">${t}</span>`).join(''):'<span class="tag" style="color:var(--muted)">NO_EXTRATAGS // OSM 信息少，可在 OSM 上补充</span>'}</div>
+    <div style="margin-top:12px;display:grid;gap:6px">
+      <div style="display:flex;gap:6px">
+        <button class="pri" style="flex:1;min-height:36px;font-size:10px" onclick="document.getElementById('detailFrame').hidden=false;document.getElementById('detailFrame').src='${r.lat},${r.lng}'.includes(',')?'https://www.openstreetmap.org/export/embed.html?bbox=${r.lng-0.002}%2C${r.lat-0.002}%2C${r.lng+0.002}%2C${r.lat+0.002}&layer=mapnik&marker=${r.lat}%2C${r.lng}':'about:blank'">内部详情 OSM</button>
+        <button style="flex:1;min-height:36px;font-size:10px" onclick="window.open('${r.lat},${r.lng}'.includes(',')?'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${r.lat},${r.lng}':'about:blank','_blank')">街景 STREET</button>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button style="flex:1;min-height:32px;font-size:10px" onclick="window.open('${''}'+gmapUrl,'_blank')">外部 Google Maps</button>
+        <button style="flex:1;min-height:32px;font-size:10px" onclick="window.open('${''}'+osmUrl,'_blank')">OSM 网页</button>
+        <button style="min-height:32px;font-size:10px" onclick="navigator.clipboard.writeText('${r.lat},${r.lng}').then(()=>{document.getElementById('status').textContent='◍ COORD_COPIED';})">复制</button>
+      </div>
+      <iframe id="detailFrame" hidden style="width:100%;height:220px;border:1px solid var(--line);border-radius:4px;margin-top:6px;background:#02070A"></iframe>
     </div>`;
+
   card.hidden=false;
 }
 function pickPlace(r){
@@ -238,8 +249,13 @@ function pickPlace(r){
   if(destMarker) destMarker.remove();
   const icon=L.divIcon({className:'',html:'<div class="pin"></div>',iconSize:[18,24],iconAnchor:[9,24]});
   destMarker=L.marker([r.lat,r.lng],{icon}).addTo(map);
-  map.flyTo([r.lat,r.lng],17);
+  // auto jump - smooth
+  map.flyTo([r.lat,r.lng],18,{duration:0.8});
+  // ensure sheet scrolls to show card
   buildPlaceCard(r);showPlaceCard();fetchNearby(r);
+  // close keyboard on mobile
+  try{$('#q').blur();}catch(e){}
+  setTimeout(()=>{document.getElementById('sheet').scrollTop=0;},100);
 }
 async function fetchNearby(r){
   try{
@@ -304,11 +320,19 @@ function showStep(s,d){
 }
 function progress(p){
   if(!route) return;
-  const thr=Math.max(25,(p.speed||0)*2);
-  for(let g=0;g<5;g++){
+  // anti-jitter: if too far from route, don't jump steps
+  const curStep=steps[stepIdx]; const curLoc={lat:curStep.maneuver.location[1],lng:curStep.maneuver.location[0]};
+  const distToCur=hav(p,curLoc);
+  const thr=Math.max(35,(p.speed||0)*2.2);
+  // only advance when we are really close to next
+  for(let g=0;g<3;g++){
     const nx=steps[stepIdx+1];if(!nx) return;
     const loc={lat:nx.maneuver.location[1],lng:nx.maneuver.location[0]};const d=hav(p,loc);
-    if(d<thr){if(stepIdx+1>=steps.length-1){arrive();return;}stepIdx++;continue;}
+    // require both close to next AND moving away from current
+    if(d<thr && distToCur>20){
+      if(stepIdx+1>=steps.length-1){arrive();return;}
+      stepIdx++; continue;
+    }
     showStep(nx,d);return;
   }
 }
@@ -318,8 +342,14 @@ function speak(t){if(!voiceOn) return;try{const u=new SpeechSynthesisUtterance(t
 $('#sim').onclick=()=>{
   if(!route) return;
   if(simTimer){clearInterval(simTimer);simTimer=null;$('#sim').textContent='SIMULATE';return;}
-  const pts=densify(coords,10);let i=0;if(!navigating) startNav();$('#sim').textContent='STOP_SIM';
-  simTimer=setInterval(()=>{if(i>=pts.length){clearInterval(simTimer);simTimer=null;$('#sim').textContent='SIMULATE';return;}const p=pts[i++],prev=pts[Math.max(0,i-2)];onPos({lat:p[0],lng:p[1],heading:bearing(prev,p),speed:8});},350);
+  const pts=densify(coords,6);let i=0;if(!navigating) startNav();$('#sim').textContent='STOP_SIM';
+  // stable simulation: use cubic-ish interpolation, constant step
+  simTimer=setInterval(()=>{if(i>=pts.length){clearInterval(simTimer);simTimer=null;$('#sim').textContent='SIMULATE';status('◍ SIM END');return;}
+    const p=pts[i]; const prev=pts[Math.max(0,i-1)]; const next=pts[Math.min(pts.length-1,i+1)];
+    // smooth heading average
+    let h=bearing(prev,next); if(isNaN(h)) h=bearing(prev,p);
+    onPos({lat:p[0],lng:p[1],heading:h,speed:6}); i+=1;
+  },180);
 };
 
 map.on('click',async(e)=>{
@@ -331,8 +361,16 @@ map.on('click',async(e)=>{
   }catch(err){pickPlace({name:`${lat.toFixed(5)},${lng.toFixed(5)}`,lat,lng,addr:'',props:{},extratags:{}});}
 });
 
+let searchDebounce=null;
 $('#go').onclick=()=>doSearch($('#q').value.trim());
 $('#q').addEventListener('keydown',e=>{if(e.key==='Enter') doSearch($('#q').value.trim());});
+$('#q').addEventListener('input',e=>{
+  const v=e.target.value.trim();
+  if(v.length<2){ if(v.length===0) $('#results').innerHTML=''; return; }
+  clearTimeout(searchDebounce);
+  searchDebounce=setTimeout(()=> doSearch(v), 400);
+});
+
 document.querySelectorAll('.fchip').forEach(c=> c.onclick=()=>{document.querySelectorAll('.fchip').forEach(x=>x.classList.remove('on'));c.classList.add('on');currentFilter=c.dataset.f;const q=$('#q').value.trim();if(q) doSearch(q);});
 
 function renderSaved(){
