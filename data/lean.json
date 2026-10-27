@@ -1,44 +1,32 @@
 {
-  "updated": "2026-10-24T03:09:01+00:00",
+  "updated": "2026-10-27T03:35:20+00:00",
   "usd": {
-    "asof": "2026-10-22",
+    "asof": "2026-10-23",
     "policy_rate": 3.88,
-    "short_yield_6m": 4.29,
-    "yield_2y": 4.65,
-    "score_bp": 59.0,
-    "score_5d_ago_bp": 68.0,
-    "change_bp": -9.0,
+    "short_yield_6m": 4.3,
+    "yield_2y": 4.69,
+    "score_bp": 61.5,
+    "score_5d_ago_bp": 66.0,
+    "change_bp": -4.5,
     "lean": "hawkish"
   },
   "eur": {
-    "asof": "2026-10-22",
+    "asof": "2026-10-23",
     "policy_rate": 2.5,
-    "short_yield_6m": 2.878,
-    "yield_2y": 3.293,
-    "score_bp": 58.6,
-    "score_5d_ago_bp": 52.1,
-    "change_bp": 6.5,
+    "short_yield_6m": 2.87,
+    "yield_2y": 3.229,
+    "score_bp": 54.9,
+    "score_5d_ago_bp": 54.6,
+    "change_bp": 0.3,
     "lean": "hawkish"
   },
   "relative": {
-    "usd_minus_eur_bp": 0.4,
+    "usd_minus_eur_bp": 6.6,
     "reading": "about balanced"
   },
   "history": {
     "days": 90,
     "points": [
-      {
-        "date": "2026-07-27",
-        "usd": 57.5,
-        "eur": 42.5,
-        "gap": 15.0
-      },
-      {
-        "date": "2026-07-28",
-        "usd": 53.5,
-        "eur": 41.1,
-        "gap": 12.4
-      },
       {
         "date": "2026-07-29",
         "usd": 46.5,
@@ -410,6 +398,12 @@
         "usd": 59.0,
         "eur": 58.6,
         "gap": 0.4
+      },
+      {
+        "date": "2026-10-23",
+        "usd": 61.5,
+        "eur": 54.9,
+        "gap": 6.6
       }
     ],
     "policy_changes": [
@@ -466,68 +460,116 @@
   "calendar": {
     "events": [
       {
-        "title": "French Flash Manufacturing PMI",
-        "currency": "EUR",
-        "time": "2026-10-23T07:15+00:00",
-        "impact": "Medium",
-        "forecast": "50.5",
-        "previous": "50.3"
-      },
-      {
-        "title": "French Flash Services PMI",
-        "currency": "EUR",
-        "time": "2026-10-23T07:15+00:00",
-        "impact": "Medium",
-        "forecast": "50.7",
-        "previous": "51.4"
-      },
-      {
-        "title": "German Flash Manufacturing PMI",
-        "currency": "EUR",
-        "time": "2026-10-23T07:30+00:00",
-        "impact": "Medium",
-        "forecast": "53.5",
-        "previous": "53.8"
-      },
-      {
-        "title": "German Flash Services PMI",
-        "currency": "EUR",
-        "time": "2026-10-23T07:30+00:00",
-        "impact": "Medium",
-        "forecast": "52.5",
-        "previous": "52.9"
-      },
-      {
-        "title": "Flash Manufacturing PMI",
+        "title": "CB Consumer Confidence",
         "currency": "USD",
-        "time": "2026-10-23T13:45+00:00",
+        "time": "2026-10-27T14:00+00:00",
         "impact": "Medium",
-        "forecast": "55.4",
-        "previous": "57.0"
+        "forecast": "81.2",
+        "previous": "81.9"
       },
       {
-        "title": "Flash Services PMI",
+        "title": "Federal Funds Rate",
         "currency": "USD",
-        "time": "2026-10-23T13:45+00:00",
-        "impact": "Medium",
-        "forecast": "57.9",
-        "previous": "58.7"
+        "time": "2026-10-28T18:00+00:00",
+        "impact": "High",
+        "forecast": "4.00%",
+        "previous": "4.00%"
       },
       {
-        "title": "Revised UoM Consumer Sentiment",
+        "title": "FOMC Statement",
         "currency": "USD",
-        "time": "2026-10-23T14:00+00:00",
-        "impact": "Medium",
-        "forecast": "46.3",
-        "previous": "46.3"
-      },
-      {
-        "title": "Revised UoM Inflation Expectations",
-        "currency": "USD",
-        "time": "2026-10-23T14:00+00:00",
-        "impact": "Medium",
+        "time": "2026-10-28T18:00+00:00",
+        "impact": "High",
         "forecast": "",
-        "previous": "4.7%"
+        "previous": ""
+      },
+      {
+        "title": "FOMC Press Conference",
+        "currency": "USD",
+        "time": "2026-10-28T18:30+00:00",
+        "impact": "High",
+        "forecast": "",
+        "previous": ""
+      },
+      {
+        "title": "Advance GDP q/q",
+        "currency": "USD",
+        "time": "2026-10-29T12:30+00:00",
+        "impact": "High",
+        "forecast": "3.2%",
+        "previous": "1.5%"
+      },
+      {
+        "title": "Core PCE Price Index m/m",
+        "currency": "USD",
+        "time": "2026-10-29T12:30+00:00",
+        "impact": "High",
+        "forecast": "0.3%",
+        "previous": "0.2%"
+      },
+      {
+        "title": "Advance GDP Price Index q/q",
+        "currency": "USD",
+        "time": "2026-10-29T12:30+00:00",
+        "impact": "Medium",
+        "forecast": "3.3%",
+        "previous": "6.2%"
+      },
+      {
+        "title": "Unemployment Claims",
+        "currency": "USD",
+        "time": "2026-10-29T12:30+00:00",
+        "impact": "Medium",
+        "forecast": "198K",
+        "previous": "194K"
+      },
+      {
+        "title": "Main Refinancing Rate",
+        "currency": "EUR",
+        "time": "2026-10-29T13:15+00:00",
+        "impact": "High",
+        "forecast": "2.65%",
+        "previous": "2.65%"
+      },
+      {
+        "title": "Monetary Policy Statement",
+        "currency": "EUR",
+        "time": "2026-10-29T13:15+00:00",
+        "impact": "High",
+        "forecast": "",
+        "previous": ""
+      },
+      {
+        "title": "ECB Press Conference",
+        "currency": "EUR",
+        "time": "2026-10-29T13:45+00:00",
+        "impact": "High",
+        "forecast": "",
+        "previous": ""
+      },
+      {
+        "title": "German Prelim CPI m/m",
+        "currency": "EUR",
+        "time": "2026-10-30T07:29+00:00",
+        "impact": "Medium",
+        "forecast": "0.1%",
+        "previous": "0.6%"
+      },
+      {
+        "title": "German Prelim GDP q/q",
+        "currency": "EUR",
+        "time": "2026-10-30T09:00+00:00",
+        "impact": "Medium",
+        "forecast": "0.1%",
+        "previous": "0.2%"
+      },
+      {
+        "title": "Employment Cost Index q/q",
+        "currency": "USD",
+        "time": "2026-10-30T12:30+00:00",
+        "impact": "Medium",
+        "forecast": "0.8%",
+        "previous": "0.9%"
       }
     ]
   },
