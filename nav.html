@@ -150,7 +150,16 @@ const $=s=>document.querySelector(s);
 const mem={};const store={get(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null}catch(e){return mem[k]??null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){mem[k]=v}}};
 let me=null,meMarker=null,accCircle=null,destMarker=null,routeLayer=null,dest=null,route=null,coords=[],steps=[],stepIdx=0,fallbackFrom=null,geoWatch=null,navigating=false,follow=true,voiceOn=true,simTimer=null,lastReroute=0,spoken={},wl=null,currentFilter='all',destObj=null;
 const map=L.map('map',{zoomControl:false,attributionControl:false}).setView([1.3521,103.8198],13);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',maxNativeZoom:19}).addTo(map);
+
+// FIX: Carto dark now needs API key, switch to free Esri dark + tech filter, no watermark
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',{
+  maxZoom:19, attribution:'Esri'
+}).addTo(map);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}',{
+  maxZoom:19
+}).addTo(map);
+document.getElementById('map').style.filter='contrast(1.25) brightness(0.95) saturate(0.8) hue-rotate(180deg) invert(0.02)';
+
 map.on('dragstart',()=>{follow=false;});
 function status(t){$('#status').textContent=t||'';}
 function fmtDist(m){if(m<1000)return Math.round(m)+' m';return (m/1000).toFixed(m<10000?1:0)+' km';}
