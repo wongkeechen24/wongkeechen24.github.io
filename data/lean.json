@@ -1,38 +1,32 @@
 {
-  "updated": "2026-10-27T03:35:20+00:00",
+  "updated": "2026-10-28T03:51:22+00:00",
   "usd": {
-    "asof": "2026-10-23",
+    "asof": "2026-10-26",
     "policy_rate": 3.88,
-    "short_yield_6m": 4.3,
-    "yield_2y": 4.69,
-    "score_bp": 61.5,
-    "score_5d_ago_bp": 66.0,
-    "change_bp": -4.5,
+    "short_yield_6m": 4.35,
+    "yield_2y": 4.68,
+    "score_bp": 63.5,
+    "score_5d_ago_bp": 69.0,
+    "change_bp": -5.5,
     "lean": "hawkish"
   },
   "eur": {
-    "asof": "2026-10-23",
+    "asof": "2026-10-26",
     "policy_rate": 2.5,
-    "short_yield_6m": 2.87,
-    "yield_2y": 3.229,
-    "score_bp": 54.9,
-    "score_5d_ago_bp": 54.6,
-    "change_bp": 0.3,
+    "short_yield_6m": 2.867,
+    "yield_2y": 3.248,
+    "score_bp": 55.8,
+    "score_5d_ago_bp": 56.4,
+    "change_bp": -0.6,
     "lean": "hawkish"
   },
   "relative": {
-    "usd_minus_eur_bp": 6.6,
+    "usd_minus_eur_bp": 7.7,
     "reading": "about balanced"
   },
   "history": {
     "days": 90,
     "points": [
-      {
-        "date": "2026-07-29",
-        "usd": 46.5,
-        "eur": 43.2,
-        "gap": 3.3
-      },
       {
         "date": "2026-07-30",
         "usd": 47.5,
@@ -404,6 +398,12 @@
         "usd": 61.5,
         "eur": 54.9,
         "gap": 6.6
+      },
+      {
+        "date": "2026-10-26",
+        "usd": 63.5,
+        "eur": 55.8,
+        "gap": 7.7
       }
     ],
     "policy_changes": [
@@ -512,7 +512,7 @@
         "currency": "USD",
         "time": "2026-10-29T12:30+00:00",
         "impact": "Medium",
-        "forecast": "3.3%",
+        "forecast": "3.2%",
         "previous": "6.2%"
       },
       {
