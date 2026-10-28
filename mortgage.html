@@ -73,10 +73,8 @@ tr.now td{font-weight:700}
 .notes ul{margin:0; padding-left:1.2em}
 .notes li{margin-bottom:4px; font-size:.9rem}
 .err{color:var(--warn); font-weight:600}
-.pending{list-style:none; margin:8px 0 0; padding:0}
-.pending li{padding:12px 0; border-top:1px solid var(--line)}
-.pending li:last-child{border-bottom:1px solid var(--line)}
-.pending label{margin-top:8px; max-width:340px}
+.pay.empty{color:var(--muted); font-weight:400; font-size:.95rem}
+.row label{margin-top:8px; max-width:340px}
 </style>
 </head>
 <body>
@@ -95,14 +93,9 @@ tr.now td{font-weight:700}
 
   <section aria-labelledby="h-res">
     <h2 id="h-res">各银行月供</h2>
+    <p class="loanline">每家银行下面有官网入口。没有公布数字的银行，在它下面填官网上的利率，就会立刻算出月供。</p>
     <p id="gap" class="gap"></p>
     <ol id="rows" class="rows"></ol>
-  </section>
-
-  <section aria-labelledby="h-pend">
-    <h2 id="h-pend">待核对的银行</h2>
-    <p class="loanline">这几家我没读到最新公布的数字，所以不替你填。到官网看到后，把参考有效利率填进来，就会加入上面的排名。</p>
-    <ul id="pending" class="pending"></ul>
   </section>
 
   <section aria-labelledby="h-sens">
@@ -136,10 +129,10 @@ tr.now td{font-weight:700}
       <li>月供用标准等额本息公式，按月计息。银行实际按日计息，差别很小。</li>
     </ul>
 
-    <h3>待核对和没有列出的银行</h3>
+    <h3>没有数字的银行</h3>
     <ul>
-      <li>CIMB、Public Bank、Hong Leong：我只找到 2023 年左右的旧数字（当时 OPR 是 3.00%），不使用。你到官网核对后把数字填进页面中部的输入框，就会加入排名；填入的数字页面不会核实，也不会保存，刷新后清空。</li>
-      <li>Alliance、UOB、OCBC、Bank Islam、HSBC 等：还没找到，也没有列出。</li>
+      <li>Public Bank、CIMB、Hong Leong、Alliance：我只找到 2023 年左右的旧数字（当时 OPR 是 3.00%），或没读到房贷参考有效利率，所以页面不替你填。到官网核对后，在该银行下面填入，会立刻算出月供并参与排名。填入的数字页面不核实，也不保存，刷新后清空。</li>
+      <li>UOB、OCBC、HSBC、Bank Islam 等还没有列出。</li>
     </ul>
 
     <h3>银行利率怎么更新</h3>
@@ -151,33 +144,36 @@ tr.now td{font-weight:700}
 
 <script>
 (function(){
-  // 每家银行：ielr = 银行公布的参考有效利率(%)，sbr = 发布当时的 SBR(%)，date = 生效日期
+  // 有公布数字的银行：ielr = 参考有效利率(%)，sbr = 发布当时的 SBR(%)，date = 生效日期
+  // 没读到数字的银行：只写 missing 说明，数字由你从官网读到后在页面里填
   var BANKS = [
     {name:"Maybank", ielr:3.90, sbr:2.75, date:"2025-07-11", src:"银行官网利率页",
      url:"https://www.maybank2u.com.my/maybank2u/malaysia/en/personal/rates/blr_rates.page",
      official:{url:"https://www.maybank2u.com.my/maybank2u/malaysia/en/personal/rates/blr_rates.page", label:"银行官网利率页"}},
-    {name:"AmBank", ielr:4.00, sbr:2.75, date:"2025-07-14", src:"Bernama 报道转述银行公告",
-     url:"https://bernama.com/en/news.php/target='_blank'?id=2444090",
-     official:null},
+    {name:"Public Bank",
+     missing:"只找到 2023 年左右的旧数字，不用；也没找到具体利率页。",
+     official:{url:"https://www.pbebank.com", label:"官网首页（需自己找利率页）"}},
+    {name:"CIMB",
+     missing:"官网页面列出 SBR/BR/BLR，我没读到房贷参考有效利率。",
+     official:{url:"https://www.cimb.com.my/en/personal/help-support/rates-charges/CIMB-Base-Rate-Base-Lending-Rates.html", label:"官网 SBR/BR 利率页"}},
     {name:"RHB", ielr:4.50, sbr:2.75, date:"2025-07-11", src:"银行公告 PDF",
      url:"https://www.rhbgroup.com/-/media/Files/others/highlights/announcements/H20250710-2.pdf",
      official:{url:"https://www.rhbgroup.com/-/media/Files/others/highlights/announcements/H20250710-2.pdf", label:"银行公告 PDF（2025 年 7 月）"}},
+    {name:"Hong Leong",
+     missing:"官网公告页我没完整读到房贷参考有效利率。",
+     official:{url:"https://www.hlb.com.my/en/personal-banking/news-updates/hlb-hlisb-update-sbr-br-ibr-blr-ifr-14-july-2025.html", label:"官网 2025 年 7 月利率公告"}},
+    {name:"AmBank", ielr:4.00, sbr:2.75, date:"2025-07-14", src:"Bernama 报道转述银行公告",
+     url:"https://bernama.com/en/news.php/target='_blank'?id=2444090",
+     official:null},
+    {name:"Alliance Bank",
+     missing:"官网只找到 SBR 图表，我没读到房贷参考有效利率。",
+     official:{url:"https://www.alliancebank.com.my/Alliance/media/Pdf/published-standardised-base-rate-chart-15072025.pdf", label:"官网 SBR 图表 PDF（2025 年 7 月）"}},
     {name:"Standard Chartered", ielr:4.60, sbr:2.75, date:"2025-07-16", src:"银行官网利率页",
      url:"https://www.sc.com/my/deposits/interest-rates",
      official:{url:"https://www.sc.com/my/deposits/interest-rates", label:"银行官网利率页"}}
   ];
-
-  // 没读到最新公布数字的银行：只给官网入口，数字由你从官网读到后自己填
-  var PENDING = [
-    {name:"CIMB", note:"官网页面列出 SBR/BR/BLR，我没读到房贷参考有效利率。",
-     official:{url:"https://www.cimb.com.my/en/personal/help-support/rates-charges/CIMB-Base-Rate-Base-Lending-Rates.html", label:"官网 SBR/BR 利率页"}},
-    {name:"Public Bank", note:"只找到 2023 年左右的旧数字，不用；也没找到具体利率页。",
-     official:{url:"https://www.pbebank.com", label:"官网首页（需自己找利率页）"}},
-    {name:"Hong Leong", note:"官网公告页我没完整读到房贷参考有效利率。",
-     official:{url:"https://www.hlb.com.my/en/personal-banking/news-updates/hlb-hlisb-update-sbr-br-ibr-blr-ifr-14-july-2025.html", label:"官网 2025 年 7 月利率公告"}}
-  ];
   var userRates = {};
-
+  var lastMax = 0;
 
   var $ = function(id){ return document.getElementById(id); };
   var el = function(t, c, x){
@@ -199,20 +195,22 @@ tr.now td{font-weight:700}
   function monthsSince(d){
     return Math.floor((Date.now() - new Date(d + "T00:00:00Z").getTime()) / (30.44 * 86400000));
   }
+  function hasData(b){ return b.ielr !== undefined; }
   function baseOf(b){ return OPR ? OPR.opr : b.sbr; }
   function rateOf(b, shift){
-    if (b.user) return Math.round((b.ielr + (shift || 0)) * 100) / 100;
+    shift = shift || 0;
+    if (!hasData(b)){
+      var u = userRates[b.name];
+      return u > 0 ? Math.round((u + shift) * 100) / 100 : null;
+    }
     var spread = b.ielr - b.sbr;
-    return Math.round((baseOf(b) + (shift || 0) + spread) * 100) / 100;
+    return Math.round((baseOf(b) + shift + spread) * 100) / 100;
   }
-
-  function allBanks(){
-    var out = BANKS.slice();
-    PENDING.forEach(function(p){
-      var v = userRates[p.name];
-      if (v > 0) out.push({name:p.name, ielr:v, user:true, official:p.official});
-    });
-    return out;
+  function itemFor(b, P, n){
+    var rate = rateOf(b, 0);
+    if (rate === null) return {b:b, rate:null};
+    var m = pmt(P, rate, n);
+    return {b:b, rate:rate, m:m, interest:m * n - P, manual:!hasData(b)};
   }
   function officialLine(o){
     var p = el("p", "src");
@@ -222,28 +220,6 @@ tr.now td{font-weight:700}
     a.href = o.url; a.target = "_blank"; a.rel = "noopener";
     p.appendChild(a);
     return p;
-  }
-  function renderPending(){
-    var ul = $("pending");
-    ul.textContent = "";
-    PENDING.forEach(function(p){
-      var li = el("li");
-      li.appendChild(el("div", "name", p.name));
-      li.appendChild(el("p", "detail", p.note));
-      li.appendChild(officialLine(p.official));
-      var lab = el("label", null, "在官网看到的参考有效利率（%），填了就加入排名");
-      var inp = el("input");
-      inp.type = "number"; inp.step = "0.01"; inp.min = "0"; inp.max = "15";
-      inp.inputMode = "decimal"; inp.placeholder = "例如 4.20";
-      inp.addEventListener("input", function(){
-        var v = parseFloat(inp.value);
-        if (v > 0 && v < 15) userRates[p.name] = v; else delete userRates[p.name];
-        calc();
-      });
-      lab.appendChild(inp);
-      li.appendChild(lab);
-      ul.appendChild(li);
-    });
   }
 
   function renderOpr(){
@@ -262,61 +238,43 @@ tr.now td{font-weight:700}
     box.appendChild(el("small", null, "数据抓取于 " + String(OPR.fetched_at).slice(0, 10)));
   }
 
-  function calc(){
-    var price = parseFloat($("price").value);
-    var dp = parseFloat($("dp").value);
-    var yrs = parseFloat($("yrs").value);
-    var rows = $("rows"), gap = $("gap"), loan = $("loan"), sens = $("sens");
-    rows.textContent = ""; sens.textContent = ""; gap.textContent = "";
-    $("sens-for").textContent = "";
-
-    if (!(price > 0) || !(dp >= 0 && dp < 100) || !(yrs >= 1 && yrs <= 40)){
-      loan.textContent = "";
-      var e = el("li", "err", "请输入房价 > 0、首付 0–99%、年限 1–40 年。");
-      rows.appendChild(e);
+  // 一行里会随数字变化的部分
+  function fillDyn(dyn, it, maxM){
+    var b = it.b;
+    dyn.textContent = "";
+    var top = el("div", "top");
+    top.appendChild(el("span", "name", b.name));
+    if (it.rate === null){
+      top.appendChild(el("span", "pay empty", "待填写"));
+      dyn.appendChild(top);
+      dyn.appendChild(el("p", "detail", b.missing + " 在下面填官网上的参考有效利率，立刻算出月供。"));
       return;
     }
-    var P = price * (1 - dp / 100);
-    var n = Math.round(yrs * 12);
-    loan.textContent = "贷款额 " + rm(P) + "，共 " + n + " 期";
-
-    var list = allBanks().map(function(b){
-      var rate = rateOf(b, 0);
-      var m = pmt(P, rate, n);
-      return {b:b, rate:rate, m:m, interest:m * n - P};
-    }).sort(function(a, c){ return a.m - c.m; });
-
-    var maxM = list[list.length - 1].m;
-    if (list.length > 1){
-      var d = maxM - list[0].m;
-      gap.textContent = "最低和最高相差 " + rm(d) + "/月，" + yrs + " 年累计约 " + rm(d * n) + "。";
+    top.appendChild(el("span", "pay", rm(it.m) + "/月"));
+    dyn.appendChild(top);
+    var bar = el("div", "bar");
+    var fill = el("span");
+    fill.style.width = (it.m / maxM * 100).toFixed(1) + "%";
+    bar.appendChild(fill);
+    dyn.appendChild(bar);
+    if (it.manual){
+      dyn.appendChild(el("p", "detail", "利率 " + pct(it.rate) + "（你从官网填写的数字），总利息 " + rm(it.interest)));
+      dyn.appendChild(el("p", "tag", "这个利率是你自己填的，页面没有核实"));
+    } else {
+      var spread = b.ielr - b.sbr;
+      dyn.appendChild(el("p", "detail",
+        "利率 " + pct(it.rate) + "（" + pct(baseOf(b)) + " + 利差 " + pct(spread) + "），总利息 " + rm(it.interest)));
     }
+  }
 
-    list.forEach(function(x, i){
-      var b = x.b, spread = b.user ? 0 : b.ielr - b.sbr;
-      var li = el("li", "row" + (i === 0 ? " best" : ""));
-      var top = el("div", "top");
-      top.appendChild(el("span", "name", b.name));
-      top.appendChild(el("span", "pay", rm(x.m) + "/月"));
-      li.appendChild(top);
+  function buildRow(it, P, n, maxM, best){
+    var b = it.b;
+    var li = el("li", "row" + (best ? " best" : ""));
+    var dyn = el("div", "dyn");
+    li.appendChild(dyn);
+    fillDyn(dyn, it, maxM);
 
-      var bar = el("div", "bar");
-      var fill = el("span");
-      fill.style.width = (x.m / maxM * 100).toFixed(1) + "%";
-      bar.appendChild(fill);
-      li.appendChild(bar);
-
-      if (b.user){
-        li.appendChild(el("p", "detail", "利率 " + pct(x.rate) + "（你从官网填写的数字），总利息 " + rm(x.interest)));
-        li.appendChild(officialLine(b.official));
-        li.appendChild(el("p", "tag", "这个利率是你自己填的，页面没有核实"));
-        rows.appendChild(li);
-        return;
-      }
-
-      li.appendChild(el("p", "detail",
-        "利率 " + pct(x.rate) + "（" + pct(baseOf(b)) + " + 利差 " + pct(spread) + "），总利息 " + rm(x.interest)));
-
+    if (hasData(b)){
       var s = el("p", "src");
       s.appendChild(document.createTextNode("数字来源（发布于 " + b.date + "）："));
       var a = el("a", null, b.src);
@@ -335,11 +293,61 @@ tr.now td{font-weight:700}
       if (!OPR){
         li.appendChild(el("p", "tag", "未取得 OPR，按发布时利率显示"));
       }
-      rows.appendChild(li);
-    });
+    } else {
+      li.appendChild(officialLine(b.official));
+      var lab = el("label", null, "官网上的参考有效利率（%）");
+      var inp = el("input");
+      inp.type = "number"; inp.step = "0.01"; inp.min = "0"; inp.max = "15";
+      inp.inputMode = "decimal"; inp.placeholder = "例如 4.20";
+      if (userRates[b.name] > 0) inp.value = String(userRates[b.name]);
+      // 边输入边更新这一行；输入完离开输入框后，再整体重新排名
+      inp.addEventListener("input", function(){
+        var v = parseFloat(inp.value);
+        if (v > 0 && v < 15) userRates[b.name] = v; else delete userRates[b.name];
+        var cur = itemFor(b, P, n);
+        if (cur.m && cur.m > lastMax) lastMax = cur.m;
+        fillDyn(dyn, cur, lastMax || 1);
+      });
+      inp.addEventListener("change", calc);
+      lab.appendChild(inp);
+      li.appendChild(lab);
+    }
+    return li;
+  }
+
+  function calc(){
+    var price = parseFloat($("price").value);
+    var dp = parseFloat($("dp").value);
+    var yrs = parseFloat($("yrs").value);
+    var rows = $("rows"), gap = $("gap"), loan = $("loan"), sens = $("sens");
+    rows.textContent = ""; sens.textContent = ""; gap.textContent = "";
+    $("sens-for").textContent = "";
+
+    if (!(price > 0) || !(dp >= 0 && dp < 100) || !(yrs >= 1 && yrs <= 40)){
+      loan.textContent = "";
+      rows.appendChild(el("li", "err", "请输入房价 > 0、首付 0–99%、年限 1–40 年。"));
+      return;
+    }
+    var P = price * (1 - dp / 100);
+    var n = Math.round(yrs * 12);
+    loan.textContent = "贷款额 " + rm(P) + "，共 " + n + " 期";
+
+    var items = BANKS.map(function(b){ return itemFor(b, P, n); });
+    var done = items.filter(function(i){ return i.rate !== null; })
+                    .sort(function(a, c){ return a.m - c.m; });
+    var todo = items.filter(function(i){ return i.rate === null; });
+
+    lastMax = done[done.length - 1].m;
+    if (done.length > 1){
+      var d = lastMax - done[0].m;
+      gap.textContent = "有数字的 " + done.length + " 家里，最低和最高相差 " + rm(d) + "/月，" + yrs + " 年累计约 " + rm(d * n) + "。";
+    }
+
+    done.forEach(function(it, i){ rows.appendChild(buildRow(it, P, n, lastMax, i === 0)); });
+    todo.forEach(function(it){ rows.appendChild(buildRow(it, P, n, lastMax, false)); });
 
     // OPR 变动敏感度：以当前月供最低的银行为例
-    var best = list[0];
+    var best = done[0];
     $("sens-for").textContent = "以 " + best.b.name + " 为例，假设利差不变。";
     var head = el("tr");
     ["情景", "利率", "月供", "比现在"].forEach(function(h){ head.appendChild(el("th", null, h)); });
@@ -362,7 +370,7 @@ tr.now td{font-weight:700}
     .then(function(r){ if (!r.ok) throw new Error("no opr"); return r.json(); })
     .then(function(j){ if (typeof j.opr === "number") OPR = j; })
     .catch(function(){ OPR = null; })
-    .then(function(){ renderOpr(); renderPending(); calc(); });
+    .then(function(){ renderOpr(); calc(); });
 })();
 </script>
 </body>
