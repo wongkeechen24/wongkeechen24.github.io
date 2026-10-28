@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>宇宙三神兽 - 3D科幻展示</title>
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; }
+    #hud{
+      position: fixed; left: 14px; top: 12px; z-index: 10;
+      color: rgba(255,255,255,0.9);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-size: 14px; line-height: 1.4;
+      text-shadow: 0 0 12px rgba(80,120,255,0.35);
+      user-select: none;
+    }
+    #hud b { color: #fff; }
+    .btnHint{
+      opacity: 0.85;
+      margin-top: 4px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div id="hud">
+    <b>宇宙三神兽（演示版）</b><br/>
+    缩放：滚轮/双指缩放　视角：拖拽<br/>
+    动画：它们会在星空中环绕飞行
+    <div class="btnHint">（你有 .glb 模型的话我可以帮你直接替换外观）</div>
+  </div>
+
+  <script type="module">
+    import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
+    import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
+
+    // 基础场景
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x02030a, 0.02);
+
+    const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 2000);
+    camera.position.set(0, 10, 28);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    document.body.appendChild(renderer.domElement);
+
+    // 光照：科幻一点
+    const ambient = new THREE.AmbientLight(0x6ea8ff, 0.25);
+    scene.add(ambient);
+
+    const dir = new THREE.DirectionalLight(0xb8d8ff, 1.0);
+    dir.position.set(10, 18, 10);
+    scene.add(dir);
+
+    const rim = new THREE.PointLight(0x8ef7ff, 1.2, 200);
+    rim.position.set(-15, 10, -10);
+    scene.add(rim);
+
+    // 背景：星空粒子
+    const starCount = 5000;
+    const positions = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount; i++) {
+      const r = Math.random() * 500;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+
+      const x = r * Math.sin(phi) * Math.cos(theta);
+      const y = r * Math.cos(phi);
+      const z = r * Math.sin(phi) * Math.sin(theta);
+
+      positions[i*3+0] = x;
+      positions[i*3+1] = y;
+      positions[i*3+2] = z;
+    }
+
+    const starGeo = new THREE.BufferGeometry();
+    starGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+
+    const starMat = new THREE.PointsMaterial({
+      color: 0xdbe9ff,
+      size: 0.55,
+      sizeAttenuation: true,
+      transparent: true,
+      opacity: 0.95
+    });
+
+    const stars = new THREE.Points(starGeo, starMat);
+    scene.add(stars);
+
+    // 让人物居中：一个“舞台组”
+    const stage = new THREE.Group();
+    scene.add(stage);
+
+    // 占位“科幻神兽外观”（先用几何体）
+    function makeDialgaPlaceholder() {
+      const g = new THREE.Group();
+      const core = new THREE.Mesh(
+        new THREE.TorusKnotGeometry(2.2, 0.65, 180, 12),
+        new THREE.MeshStandardMaterial({ color: 0xbad8ff, metalness: 0.9, roughness: 0.25, emissive: 0x2c6cff, emissiveIntensity: 0.8 })
+      );
+      g.add(core);
+
+      const aura = new THREE.Mesh(
+        new THREE.SphereGeometry(2.8, 64, 64),
+        new THREE.MeshBasicMaterial({ color: 0x3b8cff, transparent: true, opacity: 0.12, wireframe: true })
+      );
+      g.add(aura);
+
+      return g;
+    }
+
+    function makePalkiaPlaceholder() {
+      const g = new THREE.Group();
+      const core = new THREE.Mesh(
+        new THREE.CylinderGeometry(1.2, 2.2, 4.6, 64, 1),
+        new THREE.MeshStandardMaterial({ color: 0x9ff0ff, metalness: 0.85, roughness: 0.22, emissive: 0x00bcd4, emissiveIntensity: 0.85 })
+      );
+      g.add(core);
+
+      const wings = new THREE.Mesh(
+        new THREE.TorusGeometry(2.6, 0.45, 20, 120),
+        new THREE.MeshStandardMaterial({ color: 0x66e6ff, metalness: 0.8, roughness: 0.3, emissive: 0x00e5ff, emissiveIntensity: 0.7 })
+      );
+      wings.rotation.x = Math.PI / 2.5;
+      g.add(wings);
+
+      return g;
+    }
+
+    function makeGiratinaPlaceholder() {
+      const g = new THREE.Group();
+      const core = new THREE.Mesh(
+        new THREE.OctahedronGeometry(2.2, 1),
+        new THREE.MeshStandardMaterial({ color: 0xcbb3ff, metalness: 0.9, roughness: 0.28, emissive: 0x7c3aed, emissiveIntensity: 0.7 })
+      );
+      g.add(core);
+
+      const halo = new THREE.Mesh(
+        new THREE.RingGeometry(2.4, 3.2, 90),
+        new THREE.MeshStandardMaterial({ color: 0x8f5cff, metalness: 0.85, roughness: 0.25, emissive: 0xa855f7, emissiveIntensity: 0.9, side: THREE.DoubleSide })
+      );
+      halo.rotation.x = Math.PI / 2;
+      g.add(halo);
+
+      return g;
+    }
+
+    const dialga = makeDialgaPlaceholder();
+    const palkia = makePalkiaPlaceholder();
+    const giratina = makeGiratinaPlaceholder();
+
+    // 缩放、初始朝向
+    dialga.scale.setScalar(1.05);
+    palkia.scale.setScalar(1.00);
+    giratina.scale.setScalar(1.00);
+
+    stage.add(dialga, palkia, giratina);
+
+    // 三者轨道参数（环绕飞行）
+    const orbitRadius = { dialga: 10.5, palkia: 13.2, giratina: 16.0 };
+    const orbitSpeed  = { dialga: 0.35, palkia: 0.26, giratina: 0.20 };
+    const orbitTilt   = { dialga: 0.35, palkia: 0.65, giratina: 0.95 };
+
+    // 控制：可拖拽/缩放
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.minDistance = 8;
+    controls.maxDistance = 70;
+    controls.target.set(0, 2.5, 0);
+    controls.update();
+
+    // 自适应
+    addEventListener("resize", () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+
+    const clock = new THREE.Clock();
+
+    function updateOrbit(obj, t, radius, speed, tilt, phase=0) {
+      // 环绕：x/z 按圆；y 做轻微上下起伏
+      const ang = t * speed + phase;
+      obj.position.x = Math.cos(ang) * radius;
+      obj.position.z = Math.sin(ang) * radius;
+      obj.position.y = 2.5 + Math.sin(ang * 1.7) * 1.2;
+
+      // 让它朝向轨道切线附近（简单做法）
+      obj.rotation.y = -ang + tilt;
+      obj.rotation.x = Math.sin(ang) * 0.15;
+      obj.rotation.z = Math.cos(ang) * 0.08;
+    }
+
+    function animate() {
+      const t = clock.getElapsedTime();
+
+      // 星空轻微漂移/闪烁
+      stars.rotation.y = t * 0.01;
+
+      // 三神兽环绕
+      updateOrbit(dialga, t, orbitRadius.dialga, orbitSpeed.dialga, orbitTilt.dialga, 0.0);
+      updateOrbit(palkia, t, orbitRadius.palkia, orbitSpeed.palkia, orbitTilt.palkia, 2.1);
+      updateOrbit(giratina, t, orbitRadius.giratina, orbitSpeed.giratina, orbitTilt.giratina, 4.2);
+
+      // 轻微自转增加“3D感”
+      dialga.rotation.y += 0.01;
+      palkia.rotation.z += 0.008;
+      giratina.rotation.x += 0.01;
+
+      // 氛围：舞台轻微呼吸
+      const s = 1 + Math.sin(t * 0.5) * 0.02;
+      stage.scale.setScalar(s);
+
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
