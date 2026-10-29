@@ -44,8 +44,7 @@
     .world-container {
       position: absolute;
       width: 3000px; height: 3000px;
-      left: 50%; top: 50%;
-      margin-left: -1500px; margin-top: -1500px;
+      left: 0; top: 0;
       transform-origin: center center;
       will-change: transform;
     }
@@ -107,7 +106,6 @@
     /* ===== 生物 3D 化重构 ===== */
     .creature-anchor {
       position: absolute; width: 0; height: 0; pointer-events: none; z-index: 10;
-      /* 光晕层提前放到这里，为了不和 img 的 blend-mode 冲突 */
     }
     .creature-float {
       position: absolute; left: 0; top: 0; width: 0; height: 0;
@@ -155,7 +153,6 @@
       border-radius: 50%;
       overflow: hidden;
       isolation: isolate;
-      /* 彻底柔化边缘，避免死板的圆形边界 */
       -webkit-mask-image: radial-gradient(circle at 50% 50%, black 40%, rgba(0,0,0,0.6) 65%, transparent 95%);
       mask-image: radial-gradient(circle at 50% 50%, black 40%, rgba(0,0,0,0.6) 65%, transparent 95%);
     }
@@ -167,17 +164,14 @@
       width: 100%; height: 100%;
       object-fit: contain; object-position: center;
       display: block; border: 0;
-      /* 核心魔法 1：让图片和暗背景环境光融合，而不是生硬的白底贴图 */
       mix-blend-mode: luminosity; 
       opacity: 0.9;
       transform-origin: center;
       filter: contrast(1.3) brightness(1.15) saturate(1.2) drop-shadow(0px 0px 10px rgba(255,255,255,0.1));
-      /* 二次柔化内部边缘 */
       -webkit-mask-image: radial-gradient(ellipse 75% 75% at 45% 45%, black 60%, transparent 95%);
       mask-image: radial-gradient(ellipse 75% 75% at 45% 45%, black 60%, transparent 95%);
     }
 
-    /* 核心魔法 2：左上光源高光 + 右下体积暗部 */
     .creature-img-wrap::after {
       content: ""; position: absolute; inset: 0; border-radius: 50%;
       background: 
@@ -188,7 +182,6 @@
       z-index: 4;
     }
 
-    /* 核心魔法 3：全息晶体外壳（内阴影 + 反光） */
     .creature-hologram-shell {
       position: absolute; inset: 0; border-radius: 50%;
       box-shadow: inset 0 0 30px rgba(255,255,255,0.15), inset 0 -20px 40px rgba(0,0,0,0.6);
@@ -201,7 +194,6 @@
       filter: blur(6px); z-index: 5; pointer-events: none;
     }
 
-    /* 特定属性颜色微调 */
     .img-dialga { filter: contrast(1.25) brightness(1.1) saturate(1.3) hue-rotate(-10deg); }
     .img-palkia { filter: contrast(1.3) brightness(1.12) saturate(1.4) hue-rotate(10deg); }
     .img-giratina { filter: contrast(1.35) brightness(1.05) saturate(1.2) hue-rotate(15deg); }
@@ -227,12 +219,11 @@
 </head>
 <body>
 
-  <!-- 背景层 -->
   <div class="cosmos-bg"></div>
   <div class="starfield"></div>
 
-  <!-- 可拖拽的宇宙画布 -->
   <div class="universe-canvas" id="canvas">
+    <!-- 核心世界层 -->
     <div class="world-container" id="world">
       
       <!-- 中心星球 -->
@@ -247,7 +238,7 @@
       </div>
 
       <!-- 生物 1：帝牙卢卡 -->
-      <div class="creature-anchor" style="left: 700px; top: 900px;">
+      <div class="creature-anchor" style="left: 1000px; top: 1000px;">
         <div class="creature-float float-dialga">
           <div class="creature-aura aura-dialga"></div>
           <div class="creature-img-wrap wrap-dialga">
@@ -259,7 +250,7 @@
       </div>
 
       <!-- 生物 2：帕路奇亚 -->
-      <div class="creature-anchor" style="left: 2300px; top: 1100px;">
+      <div class="creature-anchor" style="left: 2000px; top: 1000px;">
         <div class="creature-float float-palkia">
           <div class="creature-aura aura-palkia"></div>
           <div class="creature-img-wrap wrap-palkia">
@@ -271,7 +262,7 @@
       </div>
 
       <!-- 生物 3：骑拉帝纳 -->
-      <div class="creature-anchor" style="left: 1600px; top: 2400px;">
+      <div class="creature-anchor" style="left: 1500px; top: 2000px;">
         <div class="creature-float float-giratina">
           <div class="creature-aura aura-giratina"></div>
           <div class="creature-img-wrap wrap-giratina">
@@ -285,7 +276,6 @@
     </div>
   </div>
 
-  <!-- UI 控制面板 -->
   <div class="ui-panel">
     <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:10px; letter-spacing: 0.1em;">
       <span style="color:rgba(255,255,255,0.5);">ROTATION</span>
@@ -301,20 +291,14 @@
     </div>
   </div>
 
-  <!-- 缩放按钮 -->
   <div class="zoom-controls">
     <button class="zoom-btn" id="btn-zoom-in">+</button>
     <button class="zoom-btn" id="btn-zoom-out">−</button>
   </div>
 
-  <!-- 底部状态 -->
   <div class="info-badge" id="info-badge">100% • 0°</div>
 
   <script>
-    // ==========================================
-    // 核心交互逻辑：带惯性的宇宙画布拖拽、缩放
-    // ==========================================
-    
     const canvas = document.getElementById('canvas');
     const world = document.getElementById('world');
     const rotText = document.getElementById('rot-text');
@@ -322,61 +306,53 @@
     const infoBadge = document.getElementById('info-badge');
     const btnAuto = document.getElementById('btn-auto');
 
-    // 状态机
     let state = {
       scale: 0.85,
-      rotation: 0, // deg
-      tx: 0, // 平移
+      rotation: 0,
+      tx: 0,
       ty: 0,
-      // 惯性速度
       vx: 0, vy: 0, vScale: 0, vRotation: 0,
       isDragging: false,
       isRotating: false,
       isAuto: false,
       lastX: 0, lastY: 0,
-      // 缩放/旋转中心点
-      pivotX: window.innerWidth / 2,
-      pivotY: window.innerHeight / 2,
     };
 
-    // 限制最小/最大缩放
-    const MIN_SCALE = 0.5;
-    const MAX_SCALE = 1.2;
+    const MIN_SCALE = 0.4;
+    const MAX_SCALE = 2.5;
 
-    // 初始居中逻辑（让中心星球对准屏幕）
+    // 修复：将 (1500, 1500) 的中心点精确对齐到屏幕中心
     function initPos() {
-      const rect = world.getBoundingClientRect();
+      state.scale = 0.85;
+      state.rotation = 0;
       state.tx = window.innerWidth / 2 - 1500;
       state.ty = window.innerHeight / 2 - 1500;
-      state.scale = 0.85;
       updateTransform();
     }
+    
     window.addEventListener('resize', initPos);
     initPos();
 
-    // 统一更新 transform
     function updateTransform() {
-      // 使用原生的 translate3d 激活 GPU 加速
+      // 这里的 translate3d 的基准是 0,0 (也就是 world-container 的左上角)
       world.style.transform = `translate3d(${state.tx}px, ${state.ty}px, 0) rotate(${state.rotation}deg) scale(${state.scale})`;
       
-      // 同步 UI
       const deg = Math.round(((state.rotation % 360) + 360) % 360);
       rotText.innerText = String(deg).padStart(3, '0') + '°';
       rotSlider.value = deg;
       infoBadge.innerText = Math.round(state.scale * 100) + '% • ' + deg + '°';
     }
 
-    // ---- 鼠标/触摸 拖拽 ----
     function onPointerDown(e) {
       if (e.target.closest('.ui-panel') || e.target.closest('.zoom-controls')) return;
       
       state.isDragging = true;
-      state.isRotating = e.shiftKey || e.button === 2;
+      // 移动端没有 shift 键，如果是触摸或者在触控板上双指，更建议通过双指扭转或者直接用按钮。这里保留右键/Shift。
+      state.isRotating = e.shiftKey || e.button === 2; 
       
       state.lastX = e.clientX;
       state.lastY = e.clientY;
       
-      // 停止惯性
       state.vx = 0; state.vy = 0; state.vScale = 0; state.vRotation = 0;
     }
 
@@ -388,10 +364,8 @@
 
       if (state.isRotating) {
         state.rotation += dx * 0.4;
-        // 记录速度
         state.vRotation = dx * 0.4;
       } else {
-        // 拖拽平移，要将像素位移映射到世界坐标
         state.tx += dx;
         state.ty += dy;
         state.vx = dx;
@@ -406,69 +380,60 @@
     function onPointerUp() {
       if (!state.isDragging) return;
       state.isDragging = false;
-      // 惯性衰减的开始
     }
 
-    // 鼠标右键支持
     canvas.addEventListener('contextmenu', e => e.preventDefault());
     canvas.addEventListener('pointerdown', onPointerDown);
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp);
 
-    // ---- 滚轮缩放 ----
     canvas.addEventListener('wheel', (e) => {
       e.preventDefault();
-      
-      // 以鼠标位置为中心进行缩放
       const zoomFactor = 1 - e.deltaY * 0.001;
       let newScale = state.scale * zoomFactor;
       newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
 
       const scaleChange = newScale - state.scale;
       
-      // 缩放引起的平移修正：保持鼠标指向的点不动
+      // 简单处理：相对于世界中心缩放，避免复杂旋转下的矩阵运算，但足够顺滑
       const rect = world.getBoundingClientRect();
-      const originX = rect.left + rect.width / 2;
-      const originY = rect.top + rect.height / 2;
-      const mouseX = e.clientX - originX;
-      const mouseY = e.clientY - originY;
+      // 因为 rect 受 transform 影响，直接取视口中心
+  
+      // 计算鼠标相对屏幕的位置
+      const mouseX = e.clientX - window.innerWidth / 2;
+      const mouseY = e.clientY - window.innerHeight / 2;
 
-      // 这是简化的 2D 修正（忽略旋转，因为如果旋转了，公式会更复杂，但通常体验够了）
-      // 实际上因为有旋转，直接用中心缩放最稳。如果想优化，可以加上基于旋转矩阵的反向计算。这里为求稳定，采用中心缩放+轻微位移。
-      state.tx -= mouseX * (scaleChange / state.scale);
-      state.ty -= mouseY * (scaleChange / state.scale);
+      // 根据旋转和缩放动态调整平移，让鼠标指着的点在缩放时尽量保持不动
+      const rad = state.rotation * Math.PI / 180;
+      const cos = Math.cos(rad);
+      const sin = Math.sin(rad);
+      
+      // 反向旋转计算鼠标在世界坐标系中相对中心点的位置
+      const worldX = mouseX * cos + mouseY * sin;
+      const worldY = -mouseX * sin + mouseY * cos;
+      
+      state.tx -= worldX * scaleChange;
+      state.ty -= worldY * scaleChange;
       
       state.scale = newScale;
       updateTransform();
     }, { passive: false });
 
-    // ---- 双击重置 ----
-    canvas.addEventListener('dblclick', () => {
-      state.scale = 0.85;
-      state.rotation = 0;
-      state.tx = window.innerWidth / 2 - 1500;
-      state.ty = window.innerHeight / 2 - 1500;
-      updateTransform();
-    });
+    canvas.addEventListener('dblclick', initPos);
 
-    // ==========================================
-    // 惯性渲染循环 (requestAnimationFrame)
-    // ==========================================
     function tick() {
       let needsUpdate = false;
 
-      // 1. 自动旋转
       if (state.isAuto) {
         state.rotation += 0.15;
         needsUpdate = true;
       }
 
-      // 2. 惯性滑动 (摩擦力衰减)
       if (!state.isDragging) {
         if (Math.abs(state.vx) > 0.05 || Math.abs(state.vy) > 0.05) {
           state.tx += state.vx;
           state.ty += state.vy;
-          state.vx *= 0.94; // 摩擦系数
+          state.vx *= 0.94;
           state.vy *= 0.94;
           needsUpdate = true;
         } else {
@@ -484,39 +449,23 @@
         }
       }
 
-      // 限制最小/最大位置（可选）
       if (needsUpdate) updateTransform();
-
       requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
 
-    // ==========================================
-    // UI 控件绑定
-    // ==========================================
-    
-    // 旋转滑块
     rotSlider.addEventListener('input', (e) => {
       state.rotation = parseInt(e.target.value);
       updateTransform();
     });
 
-    // 重置
-    document.getElementById('btn-reset').addEventListener('click', () => {
-      state.scale = 0.85;
-      state.rotation = 0;
-      state.tx = window.innerWidth / 2 - 1500;
-      state.ty = window.innerHeight / 2 - 1500;
-      updateTransform();
-    });
+    document.getElementById('btn-reset').addEventListener('click', initPos);
 
-    // 自动旋转开关
     btnAuto.addEventListener('click', () => {
       state.isAuto = !state.isAuto;
       btnAuto.classList.toggle('active');
     });
 
-    // 放大缩小
     function zoom(amount) {
       let newScale = state.scale + amount;
       newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
@@ -525,7 +474,6 @@
     }
     document.getElementById('btn-zoom-in').addEventListener('click', () => zoom(0.1));
     document.getElementById('btn-zoom-out').addEventListener('click', () => zoom(-0.1));
-
   </script>
 </body>
 </html>
