@@ -1,38 +1,32 @@
 {
-  "updated": "2026-10-28T03:51:22+00:00",
+  "updated": "2026-10-29T04:14:22+00:00",
   "usd": {
-    "asof": "2026-10-26",
+    "asof": "2026-10-27",
     "policy_rate": 3.88,
-    "short_yield_6m": 4.35,
-    "yield_2y": 4.68,
-    "score_bp": 63.5,
-    "score_5d_ago_bp": 69.0,
+    "short_yield_6m": 4.34,
+    "yield_2y": 4.7,
+    "score_bp": 64.0,
+    "score_5d_ago_bp": 69.5,
     "change_bp": -5.5,
     "lean": "hawkish"
   },
   "eur": {
-    "asof": "2026-10-26",
+    "asof": "2026-10-27",
     "policy_rate": 2.5,
-    "short_yield_6m": 2.867,
-    "yield_2y": 3.248,
-    "score_bp": 55.8,
-    "score_5d_ago_bp": 56.4,
-    "change_bp": -0.6,
+    "short_yield_6m": 2.848,
+    "yield_2y": 3.227,
+    "score_bp": 53.8,
+    "score_5d_ago_bp": 57.8,
+    "change_bp": -4.1,
     "lean": "hawkish"
   },
   "relative": {
-    "usd_minus_eur_bp": 7.7,
+    "usd_minus_eur_bp": 10.2,
     "reading": "about balanced"
   },
   "history": {
     "days": 90,
     "points": [
-      {
-        "date": "2026-07-30",
-        "usd": 47.5,
-        "eur": 41.8,
-        "gap": 5.7
-      },
       {
         "date": "2026-07-31",
         "usd": 50.0,
@@ -404,6 +398,12 @@
         "usd": 63.5,
         "eur": 55.8,
         "gap": 7.7
+      },
+      {
+        "date": "2026-10-27",
+        "usd": 64.0,
+        "eur": 53.8,
+        "gap": 10.2
       }
     ],
     "policy_changes": [
@@ -459,14 +459,6 @@
   },
   "calendar": {
     "events": [
-      {
-        "title": "CB Consumer Confidence",
-        "currency": "USD",
-        "time": "2026-10-27T14:00+00:00",
-        "impact": "Medium",
-        "forecast": "81.2",
-        "previous": "81.9"
-      },
       {
         "title": "Federal Funds Rate",
         "currency": "USD",
