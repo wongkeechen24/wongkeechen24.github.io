@@ -1,224 +1,531 @@
-<!doctype html>
-<html lang="zh-CN">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>宇宙三神兽 - 3D科幻展示</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Cosmic Pantheon</title>
   <style>
-    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; }
-    #hud{
-      position: fixed; left: 14px; top: 12px; z-index: 10;
-      color: rgba(255,255,255,0.9);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
-      font-size: 14px; line-height: 1.4;
-      text-shadow: 0 0 12px rgba(80,120,255,0.35);
-      user-select: none;
+    /* ===== 基础重置 ===== */
+    *, ::before, ::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background-color: #050510; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+    /* ===== 宇宙星空渲染背景层 ===== */
+    .cosmos-bg {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(60% 60% at 20% 10%, rgba(122,77,255,0.15) 0%, transparent 60%),
+        radial-gradient(70% 70% at 80% 90%, rgba(42,123,255,0.12) 0%, transparent 60%),
+        radial-gradient(50% 50% at 50% 50%, rgba(167,139,250,0.08) 0%, transparent 60%);
     }
-    #hud b { color: #fff; }
-    .btnHint{
-      opacity: 0.85;
-      margin-top: 4px;
-      font-size: 12px;
+    .starfield {
+      position: fixed; inset: 0; pointer-events: none; z-index: 1;
+      background-image: 
+        radial-gradient(1px 1px at 10% 20%, white, transparent),
+        radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.8), transparent),
+        radial-gradient(1.5px 1.5px at 70% 15%, white, transparent),
+        radial-gradient(1px 1px at 90% 80%, rgba(200,200,255,0.9), transparent),
+        radial-gradient(1px 1px at 40% 90%, white, transparent);
+      background-size: 300px 300px;
+      opacity: 0.3;
     }
+
+    /* ===== 核心宇宙画布（拖拽区域） ===== */
+    .universe-canvas {
+      position: absolute; inset: 0;
+      touch-action: none;
+      cursor: grab;
+      overflow: hidden;
+      z-index: 2;
+    }
+    .universe-canvas:active { cursor: grabbing; }
+
+    /* 3000x3000 的世界容器，通过 transform 控制平移缩放旋转 */
+    .world-container {
+      position: absolute;
+      width: 3000px; height: 3000px;
+      left: 50%; top: 50%;
+      margin-left: -1500px; margin-top: -1500px;
+      transform-origin: center center;
+      will-change: transform;
+    }
+
+    /* ===== 星球（中心土星） ===== */
+    .planet-system {
+      position: absolute;
+      left: 1500px; top: 1500px;
+      width: 400px; height: 400px;
+      transform: translate(-50%, -50%);
+      perspective: 1200px;
+      transform-style: preserve-3d;
+    }
+    .planet-float {
+      position: absolute; inset: 0;
+      animation: float 6s ease-in-out infinite;
+      transform-style: preserve-3d;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-15px) rotate(1deg); }
+    }
+    .planet-core {
+      position: absolute;
+      left: 50%; top: 50%;
+      width: 180px; height: 180px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: radial-gradient(38% 38% at 32% 28%, #d6e4ff 0%, #8ab4ff 14%, #6a7cff 28%, #5a3fd6 52%, #2a1a6a 78%, #0e0a2a 100%);
+      box-shadow: inset -18px -12px 32px rgba(0,0,0,0.65), inset 10px 8px 22px rgba(180,200,255,0.55), 0 0 42px rgba(120,90,255,0.38);
+      z-index: 2;
+    }
+    .planet-highlight {
+      position: absolute; width: 46%; height: 32%; left: 18%; top: 16%;
+      background: radial-gradient(60% 80% at 50% 50%, rgba(255,255,255,0.9) 0%, transparent 72%);
+      filter: blur(0.6px); border-radius: 50%;
+    }
+    .ring-back, .ring-front {
+      position: absolute; left: 50%; top: 50%;
+      width: 440px; height: 440px; transform: translate(-50%, -50%);
+      border-radius: 50%;
+      animation: ringRotate 22s linear infinite;
+    }
+    .ring-back { clip-path: polygon(0 0, 100% 0, 100% 52%, 0 52%); z-index: 1; }
+    .ring-front { clip-path: polygon(0 52%, 100% 52%, 100% 100%, 0 100%); z-index: 3; }
+    @keyframes ringRotate {
+      0% { transform: translate(-50%, -50%) rotateX(74deg) rotateZ(-18deg); }
+      100% { transform: translate(-50%, -50%) rotateX(74deg) rotateZ(342deg); }
+    }
+    .ring-back-inner, .ring-front-inner {
+      position: absolute; inset: 0; border-radius: 50%;
+      border: 1px solid rgba(200,190,255,0.18);
+      -webkit-mask: radial-gradient(circle, transparent 108px, black 116px, black 164px, transparent 172px);
+      mask: radial-gradient(circle, transparent 108px, black 116px, black 164px, transparent 172px);
+    }
+    .ring-back-inner { background: conic-gradient(from 0deg, rgba(200,190,255,0.02) 0deg, rgba(180,170,255,0.32) 42deg, rgba(200,190,255,0.42) 170deg, rgba(200,190,255,0.02) 360deg); }
+    .ring-front-inner { background: conic-gradient(from 0deg, rgba(220,210,255,0.08) 0deg, rgba(200,190,255,0.5) 38deg, rgba(220,210,255,0.62) 168deg, rgba(220,210,255,0.08) 360deg); box-shadow: 0 0 42px rgba(180,160,255,0.42); }
+
+    /* ===== 生物 3D 化重构 ===== */
+    .creature-anchor {
+      position: absolute; width: 0; height: 0; pointer-events: none; z-index: 10;
+      /* 光晕层提前放到这里，为了不和 img 的 blend-mode 冲突 */
+    }
+    .creature-float {
+      position: absolute; left: 0; top: 0; width: 0; height: 0;
+      transform-style: preserve-3d;
+    }
+    
+    /* 不同生物不同属性的浮动、光晕 */
+    .float-dialga { animation: floatDialga 9.2s ease-in-out infinite; }
+    .float-palkia { animation: floatPalkia 11.4s ease-in-out infinite; }
+    .float-giratina { animation: floatGiratina 12.6s ease-in-out infinite; }
+    @keyframes floatDialga {
+      0%, 100% { transform: translateY(0px) rotate(-2deg) scale(0.98); }
+      50% { transform: translateY(-20px) rotate(3deg) scale(1.03); }
+    }
+    @keyframes floatPalkia {
+      0%, 100% { transform: translateY(0px) rotate(2deg) scale(0.97); }
+      50% { transform: translateY(-24px) rotate(-3deg) scale(1.04); }
+    }
+    @keyframes floatGiratina {
+      0%, 100% { transform: translateY(0px) rotate(-1deg) scale(0.96); }
+      50% { transform: translateY(-28px) rotate(4deg) scale(1.05); }
+    }
+
+    .creature-aura {
+      position: absolute; border-radius: 50%; pointer-events: none;
+      filter: blur(18px); mix-blend-mode: screen;
+    }
+    .aura-dialga {
+      width: 280px; height: 280px; left: -140px; top: -140px;
+      background: radial-gradient(55% 55% at 50% 50%, rgba(90,216,255,0.42) 0%, transparent 70%);
+    }
+    .aura-palkia {
+      width: 340px; height: 340px; left: -170px; top: -170px;
+      background: radial-gradient(55% 55% at 50% 50%, rgba(255,110,199,0.4) 0%, transparent 70%);
+    }
+    .aura-giratina {
+      width: 400px; height: 400px; left: -200px; top: -200px;
+      background: radial-gradient(60% 60% at 50% 50%, rgba(124,58,237,0.35) 0%, transparent 72%);
+    }
+
+    /* ==== 重构后的本体 ==== */
+    .creature-img-wrap {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      overflow: hidden;
+      isolation: isolate;
+      /* 彻底柔化边缘，避免死板的圆形边界 */
+      -webkit-mask-image: radial-gradient(circle at 50% 50%, black 40%, rgba(0,0,0,0.6) 65%, transparent 95%);
+      mask-image: radial-gradient(circle at 50% 50%, black 40%, rgba(0,0,0,0.6) 65%, transparent 95%);
+    }
+    .wrap-dialga { width: 260px; height: 260px; left: 0; top: 0; }
+    .wrap-palkia { width: 320px; height: 320px; left: 0; top: 0; }
+    .wrap-giratina { width: 360px; height: 360px; left: 0; top: 0; }
+
+    .creature-img {
+      width: 100%; height: 100%;
+      object-fit: contain; object-position: center;
+      display: block; border: 0;
+      /* 核心魔法 1：让图片和暗背景环境光融合，而不是生硬的白底贴图 */
+      mix-blend-mode: luminosity; 
+      opacity: 0.9;
+      transform-origin: center;
+      filter: contrast(1.3) brightness(1.15) saturate(1.2) drop-shadow(0px 0px 10px rgba(255,255,255,0.1));
+      /* 二次柔化内部边缘 */
+      -webkit-mask-image: radial-gradient(ellipse 75% 75% at 45% 45%, black 60%, transparent 95%);
+      mask-image: radial-gradient(ellipse 75% 75% at 45% 45%, black 60%, transparent 95%);
+    }
+
+    /* 核心魔法 2：左上光源高光 + 右下体积暗部 */
+    .creature-img-wrap::after {
+      content: ""; position: absolute; inset: 0; border-radius: 50%;
+      background: 
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3) 0%, transparent 45%),
+        radial-gradient(circle at 75% 75%, rgba(0,0,0,0.75) 0%, transparent 65%);
+      pointer-events: none;
+      mix-blend-mode: overlay;
+      z-index: 4;
+    }
+
+    /* 核心魔法 3：全息晶体外壳（内阴影 + 反光） */
+    .creature-hologram-shell {
+      position: absolute; inset: 0; border-radius: 50%;
+      box-shadow: inset 0 0 30px rgba(255,255,255,0.15), inset 0 -20px 40px rgba(0,0,0,0.6);
+      z-index: 3; pointer-events: none;
+    }
+    .creature-specular {
+      position: absolute; top: 12%; left: 18%; width: 40%; height: 20%;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(255,255,255,0.5) 0%, transparent 70%);
+      filter: blur(6px); z-index: 5; pointer-events: none;
+    }
+
+    /* 特定属性颜色微调 */
+    .img-dialga { filter: contrast(1.25) brightness(1.1) saturate(1.3) hue-rotate(-10deg); }
+    .img-palkia { filter: contrast(1.3) brightness(1.12) saturate(1.4) hue-rotate(10deg); }
+    .img-giratina { filter: contrast(1.35) brightness(1.05) saturate(1.2) hue-rotate(15deg); }
+
+    /* ===== UI 控件 ===== */
+    .ui-panel {
+      position: absolute; top: 20px; left: 20px; z-index: 50;
+      background: rgba(0,0,0,0.5); backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 20px;
+      padding: 16px; width: 190px; color: white; font-family: ui-monospace, monospace;
+    }
+    .rotation-slider { width: 100%; height: 2px; appearance: none; background: rgba(255,255,255,0.15); border-radius: 99px; outline: none; margin: 10px 0; }
+    .rotation-slider::-webkit-slider-thumb { appearance: none; width: 12px; height: 12px; border-radius: 50%; background: white; cursor: pointer; }
+    .ui-btn { flex: 1; height: 26px; border-radius: 99px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); font-size: 10px; cursor: pointer; transition: 0.2s; }
+    .ui-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+    .ui-btn.active { background: white; color: black; border-color: white; box-shadow: 0 0 12px rgba(255,255,255,0.3); }
+    
+    .zoom-controls { position: absolute; bottom: 24px; right: 24px; z-index: 50; display: flex; flex-direction: column; gap: 10px; }
+    .zoom-btn { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.08); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.12); color: white; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    
+    .info-badge { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 50; background: rgba(0,0,0,0.5); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); padding: 6px 14px; border-radius: 99px; font-family: ui-monospace, monospace; font-size: 11px; pointer-events: none; }
   </style>
 </head>
 <body>
-  <div id="hud">
-    <b>宇宙三神兽（演示版）</b><br/>
-    缩放：滚轮/双指缩放　视角：拖拽<br/>
-    动画：它们会在星空中环绕飞行
-    <div class="btnHint">（你有 .glb 模型的话我可以帮你直接替换外观）</div>
+
+  <!-- 背景层 -->
+  <div class="cosmos-bg"></div>
+  <div class="starfield"></div>
+
+  <!-- 可拖拽的宇宙画布 -->
+  <div class="universe-canvas" id="canvas">
+    <div class="world-container" id="world">
+      
+      <!-- 中心星球 -->
+      <div class="planet-system">
+        <div class="planet-float">
+          <div class="ring-back"><div class="ring-back-inner"></div></div>
+          <div class="planet-core">
+            <div class="planet-highlight"></div>
+          </div>
+          <div class="ring-front"><div class="ring-front-inner"></div></div>
+        </div>
+      </div>
+
+      <!-- 生物 1：帝牙卢卡 -->
+      <div class="creature-anchor" style="left: 700px; top: 900px;">
+        <div class="creature-float float-dialga">
+          <div class="creature-aura aura-dialga"></div>
+          <div class="creature-img-wrap wrap-dialga">
+            <div class="creature-hologram-shell"></div>
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/483.png" alt="" class="creature-img img-dialga" draggable="false" />
+            <div class="creature-specular"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 生物 2：帕路奇亚 -->
+      <div class="creature-anchor" style="left: 2300px; top: 1100px;">
+        <div class="creature-float float-palkia">
+          <div class="creature-aura aura-palkia"></div>
+          <div class="creature-img-wrap wrap-palkia">
+            <div class="creature-hologram-shell"></div>
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/484.png" alt="" class="creature-img img-palkia" draggable="false" />
+            <div class="creature-specular"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 生物 3：骑拉帝纳 -->
+      <div class="creature-anchor" style="left: 1600px; top: 2400px;">
+        <div class="creature-float float-giratina">
+          <div class="creature-aura aura-giratina"></div>
+          <div class="creature-img-wrap wrap-giratina">
+            <div class="creature-hologram-shell"></div>
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/487.png" alt="" class="creature-img img-giratina" draggable="false" />
+            <div class="creature-specular"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 
-  <script type="module">
-    import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
-    import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
+  <!-- UI 控制面板 -->
+  <div class="ui-panel">
+    <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:10px; letter-spacing: 0.1em;">
+      <span style="color:rgba(255,255,255,0.5);">ROTATION</span>
+      <span id="rot-text" style="color:white;">000°</span>
+    </div>
+    <input type="range" class="rotation-slider" id="rot-slider" min="0" max="360" value="0">
+    <div style="display:flex; gap:8px; margin-bottom:12px;">
+      <button class="ui-btn" id="btn-reset">RESET</button>
+      <button class="ui-btn" id="btn-auto">AUTO</button>
+    </div>
+    <div style="font-size:9px; color:rgba(255,255,255,0.35); line-height:1.4;">
+      DRAG / WHEEL TO ZOOM<br>SHIFT+DRAG TO ROTATE
+    </div>
+  </div>
 
-    // 基础场景
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x02030a, 0.02);
+  <!-- 缩放按钮 -->
+  <div class="zoom-controls">
+    <button class="zoom-btn" id="btn-zoom-in">+</button>
+    <button class="zoom-btn" id="btn-zoom-out">−</button>
+  </div>
 
-    const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 2000);
-    camera.position.set(0, 10, 28);
+  <!-- 底部状态 -->
+  <div class="info-badge" id="info-badge">100% • 0°</div>
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(innerWidth, innerHeight);
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-    document.body.appendChild(renderer.domElement);
+  <script>
+    // ==========================================
+    // 核心交互逻辑：带惯性的宇宙画布拖拽、缩放
+    // ==========================================
+    
+    const canvas = document.getElementById('canvas');
+    const world = document.getElementById('world');
+    const rotText = document.getElementById('rot-text');
+    const rotSlider = document.getElementById('rot-slider');
+    const infoBadge = document.getElementById('info-badge');
+    const btnAuto = document.getElementById('btn-auto');
 
-    // 光照：科幻一点
-    const ambient = new THREE.AmbientLight(0x6ea8ff, 0.25);
-    scene.add(ambient);
+    // 状态机
+    let state = {
+      scale: 0.85,
+      rotation: 0, // deg
+      tx: 0, // 平移
+      ty: 0,
+      // 惯性速度
+      vx: 0, vy: 0, vScale: 0, vRotation: 0,
+      isDragging: false,
+      isRotating: false,
+      isAuto: false,
+      lastX: 0, lastY: 0,
+      // 缩放/旋转中心点
+      pivotX: window.innerWidth / 2,
+      pivotY: window.innerHeight / 2,
+    };
 
-    const dir = new THREE.DirectionalLight(0xb8d8ff, 1.0);
-    dir.position.set(10, 18, 10);
-    scene.add(dir);
+    // 限制最小/最大缩放
+    const MIN_SCALE = 0.5;
+    const MAX_SCALE = 1.2;
 
-    const rim = new THREE.PointLight(0x8ef7ff, 1.2, 200);
-    rim.position.set(-15, 10, -10);
-    scene.add(rim);
+    // 初始居中逻辑（让中心星球对准屏幕）
+    function initPos() {
+      const rect = world.getBoundingClientRect();
+      state.tx = window.innerWidth / 2 - 1500;
+      state.ty = window.innerHeight / 2 - 1500;
+      state.scale = 0.85;
+      updateTransform();
+    }
+    window.addEventListener('resize', initPos);
+    initPos();
 
-    // 背景：星空粒子
-    const starCount = 5000;
-    const positions = new Float32Array(starCount * 3);
-    for (let i = 0; i < starCount; i++) {
-      const r = Math.random() * 500;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-
-      const x = r * Math.sin(phi) * Math.cos(theta);
-      const y = r * Math.cos(phi);
-      const z = r * Math.sin(phi) * Math.sin(theta);
-
-      positions[i*3+0] = x;
-      positions[i*3+1] = y;
-      positions[i*3+2] = z;
+    // 统一更新 transform
+    function updateTransform() {
+      // 使用原生的 translate3d 激活 GPU 加速
+      world.style.transform = `translate3d(${state.tx}px, ${state.ty}px, 0) rotate(${state.rotation}deg) scale(${state.scale})`;
+      
+      // 同步 UI
+      const deg = Math.round(((state.rotation % 360) + 360) % 360);
+      rotText.innerText = String(deg).padStart(3, '0') + '°';
+      rotSlider.value = deg;
+      infoBadge.innerText = Math.round(state.scale * 100) + '% • ' + deg + '°';
     }
 
-    const starGeo = new THREE.BufferGeometry();
-    starGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    // ---- 鼠标/触摸 拖拽 ----
+    function onPointerDown(e) {
+      if (e.target.closest('.ui-panel') || e.target.closest('.zoom-controls')) return;
+      
+      state.isDragging = true;
+      state.isRotating = e.shiftKey || e.button === 2;
+      
+      state.lastX = e.clientX;
+      state.lastY = e.clientY;
+      
+      // 停止惯性
+      state.vx = 0; state.vy = 0; state.vScale = 0; state.vRotation = 0;
+    }
 
-    const starMat = new THREE.PointsMaterial({
-      color: 0xdbe9ff,
-      size: 0.55,
-      sizeAttenuation: true,
-      transparent: true,
-      opacity: 0.95
+    function onPointerMove(e) {
+      if (!state.isDragging) return;
+      
+      const dx = e.clientX - state.lastX;
+      const dy = e.clientY - state.lastY;
+
+      if (state.isRotating) {
+        state.rotation += dx * 0.4;
+        // 记录速度
+        state.vRotation = dx * 0.4;
+      } else {
+        // 拖拽平移，要将像素位移映射到世界坐标
+        state.tx += dx;
+        state.ty += dy;
+        state.vx = dx;
+        state.vy = dy;
+      }
+
+      state.lastX = e.clientX;
+      state.lastY = e.clientY;
+      updateTransform();
+    }
+
+    function onPointerUp() {
+      if (!state.isDragging) return;
+      state.isDragging = false;
+      // 惯性衰减的开始
+    }
+
+    // 鼠标右键支持
+    canvas.addEventListener('contextmenu', e => e.preventDefault());
+    canvas.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+
+    // ---- 滚轮缩放 ----
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      
+      // 以鼠标位置为中心进行缩放
+      const zoomFactor = 1 - e.deltaY * 0.001;
+      let newScale = state.scale * zoomFactor;
+      newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
+
+      const scaleChange = newScale - state.scale;
+      
+      // 缩放引起的平移修正：保持鼠标指向的点不动
+      const rect = world.getBoundingClientRect();
+      const originX = rect.left + rect.width / 2;
+      const originY = rect.top + rect.height / 2;
+      const mouseX = e.clientX - originX;
+      const mouseY = e.clientY - originY;
+
+      // 这是简化的 2D 修正（忽略旋转，因为如果旋转了，公式会更复杂，但通常体验够了）
+      // 实际上因为有旋转，直接用中心缩放最稳。如果想优化，可以加上基于旋转矩阵的反向计算。这里为求稳定，采用中心缩放+轻微位移。
+      state.tx -= mouseX * (scaleChange / state.scale);
+      state.ty -= mouseY * (scaleChange / state.scale);
+      
+      state.scale = newScale;
+      updateTransform();
+    }, { passive: false });
+
+    // ---- 双击重置 ----
+    canvas.addEventListener('dblclick', () => {
+      state.scale = 0.85;
+      state.rotation = 0;
+      state.tx = window.innerWidth / 2 - 1500;
+      state.ty = window.innerHeight / 2 - 1500;
+      updateTransform();
     });
 
-    const stars = new THREE.Points(starGeo, starMat);
-    scene.add(stars);
+    // ==========================================
+    // 惯性渲染循环 (requestAnimationFrame)
+    // ==========================================
+    function tick() {
+      let needsUpdate = false;
 
-    // 让人物居中：一个“舞台组”
-    const stage = new THREE.Group();
-    scene.add(stage);
+      // 1. 自动旋转
+      if (state.isAuto) {
+        state.rotation += 0.15;
+        needsUpdate = true;
+      }
 
-    // 占位“科幻神兽外观”（先用几何体）
-    function makeDialgaPlaceholder() {
-      const g = new THREE.Group();
-      const core = new THREE.Mesh(
-        new THREE.TorusKnotGeometry(2.2, 0.65, 180, 12),
-        new THREE.MeshStandardMaterial({ color: 0xbad8ff, metalness: 0.9, roughness: 0.25, emissive: 0x2c6cff, emissiveIntensity: 0.8 })
-      );
-      g.add(core);
+      // 2. 惯性滑动 (摩擦力衰减)
+      if (!state.isDragging) {
+        if (Math.abs(state.vx) > 0.05 || Math.abs(state.vy) > 0.05) {
+          state.tx += state.vx;
+          state.ty += state.vy;
+          state.vx *= 0.94; // 摩擦系数
+          state.vy *= 0.94;
+          needsUpdate = true;
+        } else {
+          state.vx = 0; state.vy = 0;
+        }
 
-      const aura = new THREE.Mesh(
-        new THREE.SphereGeometry(2.8, 64, 64),
-        new THREE.MeshBasicMaterial({ color: 0x3b8cff, transparent: true, opacity: 0.12, wireframe: true })
-      );
-      g.add(aura);
+        if (Math.abs(state.vRotation) > 0.05) {
+          state.rotation += state.vRotation;
+          state.vRotation *= 0.92;
+          needsUpdate = true;
+        } else {
+          state.vRotation = 0;
+        }
+      }
 
-      return g;
+      // 限制最小/最大位置（可选）
+      if (needsUpdate) updateTransform();
+
+      requestAnimationFrame(tick);
     }
+    requestAnimationFrame(tick);
 
-    function makePalkiaPlaceholder() {
-      const g = new THREE.Group();
-      const core = new THREE.Mesh(
-        new THREE.CylinderGeometry(1.2, 2.2, 4.6, 64, 1),
-        new THREE.MeshStandardMaterial({ color: 0x9ff0ff, metalness: 0.85, roughness: 0.22, emissive: 0x00bcd4, emissiveIntensity: 0.85 })
-      );
-      g.add(core);
-
-      const wings = new THREE.Mesh(
-        new THREE.TorusGeometry(2.6, 0.45, 20, 120),
-        new THREE.MeshStandardMaterial({ color: 0x66e6ff, metalness: 0.8, roughness: 0.3, emissive: 0x00e5ff, emissiveIntensity: 0.7 })
-      );
-      wings.rotation.x = Math.PI / 2.5;
-      g.add(wings);
-
-      return g;
-    }
-
-    function makeGiratinaPlaceholder() {
-      const g = new THREE.Group();
-      const core = new THREE.Mesh(
-        new THREE.OctahedronGeometry(2.2, 1),
-        new THREE.MeshStandardMaterial({ color: 0xcbb3ff, metalness: 0.9, roughness: 0.28, emissive: 0x7c3aed, emissiveIntensity: 0.7 })
-      );
-      g.add(core);
-
-      const halo = new THREE.Mesh(
-        new THREE.RingGeometry(2.4, 3.2, 90),
-        new THREE.MeshStandardMaterial({ color: 0x8f5cff, metalness: 0.85, roughness: 0.25, emissive: 0xa855f7, emissiveIntensity: 0.9, side: THREE.DoubleSide })
-      );
-      halo.rotation.x = Math.PI / 2;
-      g.add(halo);
-
-      return g;
-    }
-
-    const dialga = makeDialgaPlaceholder();
-    const palkia = makePalkiaPlaceholder();
-    const giratina = makeGiratinaPlaceholder();
-
-    // 缩放、初始朝向
-    dialga.scale.setScalar(1.05);
-    palkia.scale.setScalar(1.00);
-    giratina.scale.setScalar(1.00);
-
-    stage.add(dialga, palkia, giratina);
-
-    // 三者轨道参数（环绕飞行）
-    const orbitRadius = { dialga: 10.5, palkia: 13.2, giratina: 16.0 };
-    const orbitSpeed  = { dialga: 0.35, palkia: 0.26, giratina: 0.20 };
-    const orbitTilt   = { dialga: 0.35, palkia: 0.65, giratina: 0.95 };
-
-    // 控制：可拖拽/缩放
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
-    controls.minDistance = 8;
-    controls.maxDistance = 70;
-    controls.target.set(0, 2.5, 0);
-    controls.update();
-
-    // 自适应
-    addEventListener("resize", () => {
-      camera.aspect = innerWidth / innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(innerWidth, innerHeight);
+    // ==========================================
+    // UI 控件绑定
+    // ==========================================
+    
+    // 旋转滑块
+    rotSlider.addEventListener('input', (e) => {
+      state.rotation = parseInt(e.target.value);
+      updateTransform();
     });
 
-    const clock = new THREE.Clock();
+    // 重置
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      state.scale = 0.85;
+      state.rotation = 0;
+      state.tx = window.innerWidth / 2 - 1500;
+      state.ty = window.innerHeight / 2 - 1500;
+      updateTransform();
+    });
 
-    function updateOrbit(obj, t, radius, speed, tilt, phase=0) {
-      // 环绕：x/z 按圆；y 做轻微上下起伏
-      const ang = t * speed + phase;
-      obj.position.x = Math.cos(ang) * radius;
-      obj.position.z = Math.sin(ang) * radius;
-      obj.position.y = 2.5 + Math.sin(ang * 1.7) * 1.2;
+    // 自动旋转开关
+    btnAuto.addEventListener('click', () => {
+      state.isAuto = !state.isAuto;
+      btnAuto.classList.toggle('active');
+    });
 
-      // 让它朝向轨道切线附近（简单做法）
-      obj.rotation.y = -ang + tilt;
-      obj.rotation.x = Math.sin(ang) * 0.15;
-      obj.rotation.z = Math.cos(ang) * 0.08;
+    // 放大缩小
+    function zoom(amount) {
+      let newScale = state.scale + amount;
+      newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
+      state.scale = newScale;
+      updateTransform();
     }
+    document.getElementById('btn-zoom-in').addEventListener('click', () => zoom(0.1));
+    document.getElementById('btn-zoom-out').addEventListener('click', () => zoom(-0.1));
 
-    function animate() {
-      const t = clock.getElapsedTime();
-
-      // 星空轻微漂移/闪烁
-      stars.rotation.y = t * 0.01;
-
-      // 三神兽环绕
-      updateOrbit(dialga, t, orbitRadius.dialga, orbitSpeed.dialga, orbitTilt.dialga, 0.0);
-      updateOrbit(palkia, t, orbitRadius.palkia, orbitSpeed.palkia, orbitTilt.palkia, 2.1);
-      updateOrbit(giratina, t, orbitRadius.giratina, orbitSpeed.giratina, orbitTilt.giratina, 4.2);
-
-      // 轻微自转增加“3D感”
-      dialga.rotation.y += 0.01;
-      palkia.rotation.z += 0.008;
-      giratina.rotation.x += 0.01;
-
-      // 氛围：舞台轻微呼吸
-      const s = 1 + Math.sin(t * 0.5) * 0.02;
-      stage.scale.setScalar(s);
-
-      renderer.render(scene, camera);
-      requestAnimationFrame(animate);
-    }
-
-    animate();
   </script>
 </body>
 </html>
