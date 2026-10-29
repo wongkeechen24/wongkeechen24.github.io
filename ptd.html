@@ -10,7 +10,7 @@
     html, body { width: 100%; height: 100%; overflow: hidden; background-color: #050510; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
 
-    /* ===== 宇宙星空渲染背景层 ===== */
+    /* ===== 背景星空 ===== */
     .cosmos-bg {
       position: fixed; inset: 0; pointer-events: none; z-index: 0;
       background:
@@ -30,7 +30,7 @@
       opacity: 0.3;
     }
 
-    /* ===== 核心宇宙画布（拖拽区域） ===== */
+    /* ===== 交互画布 ===== */
     .universe-canvas {
       position: absolute; inset: 0;
       touch-action: none;
@@ -40,7 +40,6 @@
     }
     .universe-canvas:active { cursor: grabbing; }
 
-    /* 3000x3000 的世界容器，通过 transform 控制平移缩放旋转 */
     .world-container {
       position: absolute;
       width: 3000px; height: 3000px;
@@ -49,7 +48,7 @@
       will-change: transform;
     }
 
-    /* ===== 星球（中心土星） ===== */
+    /* ===== 中心星球 ===== */
     .planet-system {
       position: absolute;
       left: 1500px; top: 1500px;
@@ -103,7 +102,7 @@
     .ring-back-inner { background: conic-gradient(from 0deg, rgba(200,190,255,0.02) 0deg, rgba(180,170,255,0.32) 42deg, rgba(200,190,255,0.42) 170deg, rgba(200,190,255,0.02) 360deg); }
     .ring-front-inner { background: conic-gradient(from 0deg, rgba(220,210,255,0.08) 0deg, rgba(200,190,255,0.5) 38deg, rgba(220,210,255,0.62) 168deg, rgba(220,210,255,0.08) 360deg); box-shadow: 0 0 42px rgba(180,160,255,0.42); }
 
-    /* ===== 生物 3D 化重构 ===== */
+    /* ===== 神兽重构（核心修改区） ===== */
     .creature-anchor {
       position: absolute; width: 0; height: 0; pointer-events: none; z-index: 10;
     }
@@ -112,7 +111,6 @@
       transform-style: preserve-3d;
     }
     
-    /* 不同生物不同属性的浮动、光晕 */
     .float-dialga { animation: floatDialga 9.2s ease-in-out infinite; }
     .float-palkia { animation: floatPalkia 11.4s ease-in-out infinite; }
     .float-giratina { animation: floatGiratina 12.6s ease-in-out infinite; }
@@ -129,74 +127,67 @@
       50% { transform: translateY(-28px) rotate(4deg) scale(1.05); }
     }
 
+    /* 外围光晕 */
     .creature-aura {
       position: absolute; border-radius: 50%; pointer-events: none;
-      filter: blur(18px); mix-blend-mode: screen;
+      filter: blur(20px); mix-blend-mode: screen;
     }
     .aura-dialga {
-      width: 280px; height: 280px; left: -140px; top: -140px;
-      background: radial-gradient(55% 55% at 50% 50%, rgba(90,216,255,0.42) 0%, transparent 70%);
+      width: 300px; height: 300px; left: -150px; top: -150px;
+      background: radial-gradient(55% 55% at 50% 50%, rgba(90,216,255,0.45) 0%, transparent 70%);
     }
     .aura-palkia {
-      width: 340px; height: 340px; left: -170px; top: -170px;
+      width: 360px; height: 360px; left: -180px; top: -180px;
       background: radial-gradient(55% 55% at 50% 50%, rgba(255,110,199,0.4) 0%, transparent 70%);
     }
     .aura-giratina {
-      width: 400px; height: 400px; left: -200px; top: -200px;
+      width: 420px; height: 420px; left: -210px; top: -210px;
       background: radial-gradient(60% 60% at 50% 50%, rgba(124,58,237,0.35) 0%, transparent 72%);
     }
 
-    /* ==== 重构后的本体 ==== */
+    /* 图片容器：取消圆形裁剪，改为完全自由 */
     .creature-img-wrap {
       position: absolute;
       transform: translate(-50%, -50%);
-      border-radius: 50%;
-      overflow: hidden;
-      isolation: isolate;
-      -webkit-mask-image: radial-gradient(circle at 50% 50%, black 40%, rgba(0,0,0,0.6) 65%, transparent 95%);
-      mask-image: radial-gradient(circle at 50% 50%, black 40%, rgba(0,0,0,0.6) 65%, transparent 95%);
+      /* 放大一点保证头脚不被切 */
+      width: 100%; height: 100%;
     }
-    .wrap-dialga { width: 260px; height: 260px; left: 0; top: 0; }
-    .wrap-palkia { width: 320px; height: 320px; left: 0; top: 0; }
-    .wrap-giratina { width: 360px; height: 360px; left: 0; top: 0; }
+    /* 稍微放大一点容器尺寸 */
+    .wrap-dialga { width: 320px; height: 320px; left: 0; top: 0; }
+    .wrap-palkia { width: 380px; height: 380px; left: 0; top: 0; }
+    .wrap-giratina { width: 420px; height: 420px; left: 0; top: 0; }
 
+    /* 图片本体 */
     .creature-img {
       width: 100%; height: 100%;
       object-fit: contain; object-position: center;
       display: block; border: 0;
-      mix-blend-mode: luminosity; 
-      opacity: 0.9;
+      /* 取消 luminosity，改用 screen 让白底发光融入黑色 */
+      mix-blend-mode: screen; 
+      opacity: 0.95;
       transform-origin: center;
-      filter: contrast(1.3) brightness(1.15) saturate(1.2) drop-shadow(0px 0px 10px rgba(255,255,255,0.1));
-      -webkit-mask-image: radial-gradient(ellipse 75% 75% at 45% 45%, black 60%, transparent 95%);
-      mask-image: radial-gradient(ellipse 75% 75% at 45% 45%, black 60%, transparent 95%);
+      /* 提高对比度和色彩 */
+      filter: contrast(1.4) brightness(1.2) saturate(1.4) drop-shadow(0 0 15px rgba(255,255,255,0.2));
+      
+      /* 核心：用径向遮罩让图片边缘融化 */
+      -webkit-mask-image: radial-gradient(ellipse 65% 65% at 50% 50%, black 40%, rgba(0,0,0,0.8) 60%, transparent 85%);
+      mask-image: radial-gradient(ellipse 65% 65% at 50% 50%, black 40%, rgba(0,0,0,0.8) 60%, transparent 85%);
     }
 
-    .creature-img-wrap::after {
-      content: ""; position: absolute; inset: 0; border-radius: 50%;
+    /* 全局体积光照（左上高光，右下暗角，不再有实体边缘） */
+    .creature-light-overlay {
+      position: absolute; inset: 0; pointer-events: none;
       background: 
-        radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3) 0%, transparent 45%),
-        radial-gradient(circle at 75% 75%, rgba(0,0,0,0.75) 0%, transparent 65%);
-      pointer-events: none;
+        radial-gradient(circle at 35% 35%, rgba(255,255,255,0.35) 0%, transparent 50%),
+        radial-gradient(circle at 70% 70%, rgba(0,0,0,0.8) 0%, transparent 70%);
       mix-blend-mode: overlay;
       z-index: 4;
     }
 
-    .creature-hologram-shell {
-      position: absolute; inset: 0; border-radius: 50%;
-      box-shadow: inset 0 0 30px rgba(255,255,255,0.15), inset 0 -20px 40px rgba(0,0,0,0.6);
-      z-index: 3; pointer-events: none;
-    }
-    .creature-specular {
-      position: absolute; top: 12%; left: 18%; width: 40%; height: 20%;
-      border-radius: 50%;
-      background: radial-gradient(ellipse at center, rgba(255,255,255,0.5) 0%, transparent 70%);
-      filter: blur(6px); z-index: 5; pointer-events: none;
-    }
-
-    .img-dialga { filter: contrast(1.25) brightness(1.1) saturate(1.3) hue-rotate(-10deg); }
-    .img-palkia { filter: contrast(1.3) brightness(1.12) saturate(1.4) hue-rotate(10deg); }
-    .img-giratina { filter: contrast(1.35) brightness(1.05) saturate(1.2) hue-rotate(15deg); }
+    /* 特定生物色彩调教 */
+    .img-dialga { filter: contrast(1.4) brightness(1.2) saturate(1.5) hue-rotate(-10deg) drop-shadow(0 0 20px rgba(90,216,255,0.4)); }
+    .img-palkia { filter: contrast(1.4) brightness(1.2) saturate(1.5) hue-rotate(10deg) drop-shadow(0 0 20px rgba(255,110,199,0.4)); }
+    .img-giratina { filter: contrast(1.5) brightness(1.1) saturate(1.3) hue-rotate(15deg) drop-shadow(0 0 25px rgba(124,58,237,0.5)); }
 
     /* ===== UI 控件 ===== */
     .ui-panel {
@@ -223,7 +214,6 @@
   <div class="starfield"></div>
 
   <div class="universe-canvas" id="canvas">
-    <!-- 核心世界层 -->
     <div class="world-container" id="world">
       
       <!-- 中心星球 -->
@@ -241,10 +231,11 @@
       <div class="creature-anchor" style="left: 1000px; top: 1000px;">
         <div class="creature-float float-dialga">
           <div class="creature-aura aura-dialga"></div>
+          <!-- 容器不再裁剪 -->
           <div class="creature-img-wrap wrap-dialga">
-            <div class="creature-hologram-shell"></div>
             <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/483.png" alt="" class="creature-img img-dialga" draggable="false" />
-            <div class="creature-specular"></div>
+            <!-- 叠加体光影 -->
+            <div class="creature-light-overlay"></div>
           </div>
         </div>
       </div>
@@ -254,9 +245,8 @@
         <div class="creature-float float-palkia">
           <div class="creature-aura aura-palkia"></div>
           <div class="creature-img-wrap wrap-palkia">
-            <div class="creature-hologram-shell"></div>
             <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/484.png" alt="" class="creature-img img-palkia" draggable="false" />
-            <div class="creature-specular"></div>
+            <div class="creature-light-overlay"></div>
           </div>
         </div>
       </div>
@@ -266,9 +256,8 @@
         <div class="creature-float float-giratina">
           <div class="creature-aura aura-giratina"></div>
           <div class="creature-img-wrap wrap-giratina">
-            <div class="creature-hologram-shell"></div>
             <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/487.png" alt="" class="creature-img img-giratina" draggable="false" />
-            <div class="creature-specular"></div>
+            <div class="creature-light-overlay"></div>
           </div>
         </div>
       </div>
@@ -276,6 +265,7 @@
     </div>
   </div>
 
+  <!-- UI -->
   <div class="ui-panel">
     <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:10px; letter-spacing: 0.1em;">
       <span style="color:rgba(255,255,255,0.5);">ROTATION</span>
@@ -321,7 +311,6 @@
     const MIN_SCALE = 0.4;
     const MAX_SCALE = 2.5;
 
-    // 修复：将 (1500, 1500) 的中心点精确对齐到屏幕中心
     function initPos() {
       state.scale = 0.85;
       state.rotation = 0;
@@ -334,7 +323,6 @@
     initPos();
 
     function updateTransform() {
-      // 这里的 translate3d 的基准是 0,0 (也就是 world-container 的左上角)
       world.style.transform = `translate3d(${state.tx}px, ${state.ty}px, 0) rotate(${state.rotation}deg) scale(${state.scale})`;
       
       const deg = Math.round(((state.rotation % 360) + 360) % 360);
@@ -347,7 +335,6 @@
       if (e.target.closest('.ui-panel') || e.target.closest('.zoom-controls')) return;
       
       state.isDragging = true;
-      // 移动端没有 shift 键，如果是触摸或者在触控板上双指，更建议通过双指扭转或者直接用按钮。这里保留右键/Shift。
       state.isRotating = e.shiftKey || e.button === 2; 
       
       state.lastX = e.clientX;
@@ -394,21 +381,12 @@
       newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
 
       const scaleChange = newScale - state.scale;
-      
-      // 简单处理：相对于世界中心缩放，避免复杂旋转下的矩阵运算，但足够顺滑
-      const rect = world.getBoundingClientRect();
-      // 因为 rect 受 transform 影响，直接取视口中心
-  
-      // 计算鼠标相对屏幕的位置
       const mouseX = e.clientX - window.innerWidth / 2;
       const mouseY = e.clientY - window.innerHeight / 2;
-
-      // 根据旋转和缩放动态调整平移，让鼠标指着的点在缩放时尽量保持不动
       const rad = state.rotation * Math.PI / 180;
       const cos = Math.cos(rad);
       const sin = Math.sin(rad);
       
-      // 反向旋转计算鼠标在世界坐标系中相对中心点的位置
       const worldX = mouseX * cos + mouseY * sin;
       const worldY = -mouseX * sin + mouseY * cos;
       
