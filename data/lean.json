@@ -1,27 +1,27 @@
 {
-  "updated": "2026-10-30T04:14:15+00:00",
+  "updated": "2026-10-31T03:55:40+00:00",
   "usd": {
-    "asof": "2026-10-28",
+    "asof": "2026-10-29",
     "policy_rate": 3.88,
-    "short_yield_6m": 4.32,
-    "yield_2y": 4.67,
-    "score_bp": 61.5,
-    "score_5d_ago_bp": 70.0,
-    "change_bp": -8.5,
+    "short_yield_6m": 4.28,
+    "yield_2y": 4.61,
+    "score_bp": 56.5,
+    "score_5d_ago_bp": 59.0,
+    "change_bp": -2.5,
     "lean": "hawkish"
   },
   "eur": {
-    "asof": "2026-10-28",
+    "asof": "2026-10-29",
     "policy_rate": 2.5,
-    "short_yield_6m": 2.86,
-    "yield_2y": 3.272,
-    "score_bp": 56.6,
-    "score_5d_ago_bp": 57.1,
-    "change_bp": -0.5,
+    "short_yield_6m": 2.852,
+    "yield_2y": 3.215,
+    "score_bp": 53.3,
+    "score_5d_ago_bp": 58.6,
+    "change_bp": -5.2,
     "lean": "hawkish"
   },
   "relative": {
-    "usd_minus_eur_bp": 4.9,
+    "usd_minus_eur_bp": 3.2,
     "reading": "about balanced"
   },
   "history": {
@@ -404,6 +404,12 @@
         "usd": 61.5,
         "eur": 56.6,
         "gap": 4.9
+      },
+      {
+        "date": "2026-10-29",
+        "usd": 56.5,
+        "eur": 53.3,
+        "gap": 3.2
       }
     ],
     "policy_changes": [
@@ -441,9 +447,9 @@
     },
     "eur": {
       "unemployment": {
-        "value": 6.4,
-        "prev": 6.4,
-        "asof": "2026-08"
+        "value": 6.5,
+        "prev": 6.5,
+        "asof": "2026-09"
       },
       "cpi_yoy": {
         "value": 3.8,
@@ -459,62 +465,6 @@
   },
   "calendar": {
     "events": [
-      {
-        "title": "Advance GDP q/q",
-        "currency": "USD",
-        "time": "2026-10-29T12:30+00:00",
-        "impact": "High",
-        "forecast": "3.2%",
-        "previous": "1.5%"
-      },
-      {
-        "title": "Core PCE Price Index m/m",
-        "currency": "USD",
-        "time": "2026-10-29T12:30+00:00",
-        "impact": "High",
-        "forecast": "0.3%",
-        "previous": "0.2%"
-      },
-      {
-        "title": "Advance GDP Price Index q/q",
-        "currency": "USD",
-        "time": "2026-10-29T12:30+00:00",
-        "impact": "Medium",
-        "forecast": "3.2%",
-        "previous": "6.2%"
-      },
-      {
-        "title": "Unemployment Claims",
-        "currency": "USD",
-        "time": "2026-10-29T12:30+00:00",
-        "impact": "Medium",
-        "forecast": "198K",
-        "previous": "194K"
-      },
-      {
-        "title": "Main Refinancing Rate",
-        "currency": "EUR",
-        "time": "2026-10-29T13:15+00:00",
-        "impact": "High",
-        "forecast": "2.65%",
-        "previous": "2.65%"
-      },
-      {
-        "title": "Monetary Policy Statement",
-        "currency": "EUR",
-        "time": "2026-10-29T13:15+00:00",
-        "impact": "High",
-        "forecast": "",
-        "previous": ""
-      },
-      {
-        "title": "ECB Press Conference",
-        "currency": "EUR",
-        "time": "2026-10-29T13:45+00:00",
-        "impact": "High",
-        "forecast": "",
-        "previous": ""
-      },
       {
         "title": "German Prelim CPI m/m",
         "currency": "EUR",
@@ -542,20 +492,20 @@
     ]
   },
   "cot": {
-    "asof": "2026-10-20",
-    "open_interest": 877940,
+    "asof": "2026-10-27",
+    "open_interest": 868188,
     "weeks": 52,
     "leveraged_funds": {
-      "net": -68840,
-      "change": -839,
-      "pct_of_oi": -7.8,
+      "net": -71574,
+      "change": -2734,
+      "pct_of_oi": -8.2,
       "percentile_1y": 0
     },
     "asset_managers": {
-      "net": 190421,
-      "change": -9497,
-      "pct_of_oi": 21.7,
-      "percentile_1y": 2
+      "net": 173249,
+      "change": -17172,
+      "pct_of_oi": 20.0,
+      "percentile_1y": 0
     }
   }
 }
