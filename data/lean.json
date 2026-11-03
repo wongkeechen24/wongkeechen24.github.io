@@ -1,44 +1,32 @@
 {
-  "updated": "2026-10-31T03:55:40+00:00",
+  "updated": "2026-11-03T05:13:04+00:00",
   "usd": {
-    "asof": "2026-10-29",
+    "asof": "2026-10-30",
     "policy_rate": 3.88,
-    "short_yield_6m": 4.28,
-    "yield_2y": 4.61,
-    "score_bp": 56.5,
-    "score_5d_ago_bp": 59.0,
-    "change_bp": -2.5,
+    "short_yield_6m": 4.25,
+    "yield_2y": 4.56,
+    "score_bp": 52.5,
+    "score_5d_ago_bp": 61.5,
+    "change_bp": -9.0,
     "lean": "hawkish"
   },
   "eur": {
-    "asof": "2026-10-29",
+    "asof": "2026-10-30",
     "policy_rate": 2.5,
-    "short_yield_6m": 2.852,
-    "yield_2y": 3.215,
-    "score_bp": 53.3,
-    "score_5d_ago_bp": 58.6,
-    "change_bp": -5.2,
+    "short_yield_6m": 2.861,
+    "yield_2y": 3.238,
+    "score_bp": 55.0,
+    "score_5d_ago_bp": 54.9,
+    "change_bp": 0.0,
     "lean": "hawkish"
   },
   "relative": {
-    "usd_minus_eur_bp": 3.2,
+    "usd_minus_eur_bp": -2.5,
     "reading": "about balanced"
   },
   "history": {
     "days": 90,
     "points": [
-      {
-        "date": "2026-08-03",
-        "usd": 50.5,
-        "eur": 41.1,
-        "gap": 9.4
-      },
-      {
-        "date": "2026-08-04",
-        "usd": 47.0,
-        "eur": 37.9,
-        "gap": 9.1
-      },
       {
         "date": "2026-08-05",
         "usd": 45.0,
@@ -410,6 +398,12 @@
         "usd": 56.5,
         "eur": 53.3,
         "gap": 3.2
+      },
+      {
+        "date": "2026-10-30",
+        "usd": 52.5,
+        "eur": 55.0,
+        "gap": -2.5
       }
     ],
     "policy_changes": [
@@ -466,28 +460,108 @@
   "calendar": {
     "events": [
       {
-        "title": "German Prelim CPI m/m",
-        "currency": "EUR",
-        "time": "2026-10-30T07:29+00:00",
-        "impact": "Medium",
-        "forecast": "0.1%",
-        "previous": "0.6%"
-      },
-      {
-        "title": "German Prelim GDP q/q",
-        "currency": "EUR",
-        "time": "2026-10-30T09:00+00:00",
-        "impact": "Medium",
-        "forecast": "0.1%",
-        "previous": "0.2%"
-      },
-      {
-        "title": "Employment Cost Index q/q",
+        "title": "ISM Manufacturing PMI",
         "currency": "USD",
-        "time": "2026-10-30T12:30+00:00",
+        "time": "2026-11-02T15:00+00:00",
         "impact": "Medium",
-        "forecast": "0.8%",
-        "previous": "0.9%"
+        "forecast": "54.5",
+        "previous": "54.5"
+      },
+      {
+        "title": "JOLTS Job Openings",
+        "currency": "USD",
+        "time": "2026-11-03T15:00+00:00",
+        "impact": "Medium",
+        "forecast": "7.15M",
+        "previous": "7.08M"
+      },
+      {
+        "title": "Congressional Elections",
+        "currency": "USD",
+        "time": "2026-11-03T15:16+00:00",
+        "impact": "High",
+        "forecast": "",
+        "previous": ""
+      },
+      {
+        "title": "Core CPI Flash Estimate y/y",
+        "currency": "EUR",
+        "time": "2026-11-04T10:00+00:00",
+        "impact": "Medium",
+        "forecast": "2.5%",
+        "previous": "2.5%"
+      },
+      {
+        "title": "CPI Flash Estimate y/y",
+        "currency": "EUR",
+        "time": "2026-11-04T10:00+00:00",
+        "impact": "Medium",
+        "forecast": "4.0%",
+        "previous": "3.8%"
+      },
+      {
+        "title": "ISM Services PMI",
+        "currency": "USD",
+        "time": "2026-11-04T15:00+00:00",
+        "impact": "Medium",
+        "forecast": "54.8",
+        "previous": "54.9"
+      },
+      {
+        "title": "Unemployment Claims",
+        "currency": "USD",
+        "time": "2026-11-05T13:30+00:00",
+        "impact": "Medium",
+        "forecast": "197K",
+        "previous": "194K"
+      },
+      {
+        "title": "ECB President Lagarde Speaks",
+        "currency": "EUR",
+        "time": "2026-11-05T18:00+00:00",
+        "impact": "Medium",
+        "forecast": "",
+        "previous": ""
+      },
+      {
+        "title": "Average Hourly Earnings m/m",
+        "currency": "USD",
+        "time": "2026-11-06T13:30+00:00",
+        "impact": "High",
+        "forecast": "0.3%",
+        "previous": "0.1%"
+      },
+      {
+        "title": "Non-Farm Employment Change",
+        "currency": "USD",
+        "time": "2026-11-06T13:30+00:00",
+        "impact": "High",
+        "forecast": "65K",
+        "previous": "29K"
+      },
+      {
+        "title": "Unemployment Rate",
+        "currency": "USD",
+        "time": "2026-11-06T13:30+00:00",
+        "impact": "High",
+        "forecast": "4.2%",
+        "previous": "4.2%"
+      },
+      {
+        "title": "Prelim UoM Consumer Sentiment",
+        "currency": "USD",
+        "time": "2026-11-06T15:00+00:00",
+        "impact": "Medium",
+        "forecast": "48.1",
+        "previous": "46.3"
+      },
+      {
+        "title": "Prelim UoM Inflation Expectations",
+        "currency": "USD",
+        "time": "2026-11-06T15:00+00:00",
+        "impact": "Medium",
+        "forecast": "",
+        "previous": "4.7%"
       }
     ]
   },
