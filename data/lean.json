@@ -1,38 +1,32 @@
 {
-  "updated": "2026-11-03T05:13:04+00:00",
+  "updated": "2026-11-04T04:43:43+00:00",
   "usd": {
-    "asof": "2026-10-30",
+    "asof": "2026-11-02",
     "policy_rate": 3.88,
     "short_yield_6m": 4.25,
-    "yield_2y": 4.56,
-    "score_bp": 52.5,
-    "score_5d_ago_bp": 61.5,
-    "change_bp": -9.0,
+    "yield_2y": 4.59,
+    "score_bp": 54.0,
+    "score_5d_ago_bp": 63.5,
+    "change_bp": -9.5,
     "lean": "hawkish"
   },
   "eur": {
-    "asof": "2026-10-30",
+    "asof": "2026-11-02",
     "policy_rate": 2.5,
-    "short_yield_6m": 2.861,
-    "yield_2y": 3.238,
-    "score_bp": 55.0,
-    "score_5d_ago_bp": 54.9,
-    "change_bp": 0.0,
+    "short_yield_6m": 2.868,
+    "yield_2y": 3.2,
+    "score_bp": 53.4,
+    "score_5d_ago_bp": 55.8,
+    "change_bp": -2.4,
     "lean": "hawkish"
   },
   "relative": {
-    "usd_minus_eur_bp": -2.5,
+    "usd_minus_eur_bp": 0.6,
     "reading": "about balanced"
   },
   "history": {
     "days": 90,
     "points": [
-      {
-        "date": "2026-08-05",
-        "usd": 45.0,
-        "eur": 38.4,
-        "gap": 6.6
-      },
       {
         "date": "2026-08-06",
         "usd": 49.0,
@@ -404,6 +398,12 @@
         "usd": 52.5,
         "eur": 55.0,
         "gap": -2.5
+      },
+      {
+        "date": "2026-11-02",
+        "usd": 54.0,
+        "eur": 53.4,
+        "gap": 0.6
       }
     ],
     "policy_changes": [
@@ -459,14 +459,6 @@
   },
   "calendar": {
     "events": [
-      {
-        "title": "ISM Manufacturing PMI",
-        "currency": "USD",
-        "time": "2026-11-02T15:00+00:00",
-        "impact": "Medium",
-        "forecast": "54.5",
-        "previous": "54.5"
-      },
       {
         "title": "JOLTS Job Openings",
         "currency": "USD",
