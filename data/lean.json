@@ -1,27 +1,27 @@
 {
-  "updated": "2026-11-06T04:57:49+00:00",
+  "updated": "2026-11-07T04:30:02+00:00",
   "usd": {
-    "asof": "2026-11-04",
+    "asof": "2026-11-05",
     "policy_rate": 3.88,
-    "short_yield_6m": 4.25,
-    "yield_2y": 4.58,
-    "score_bp": 53.5,
-    "score_5d_ago_bp": 61.5,
-    "change_bp": -8.0,
+    "short_yield_6m": 4.19,
+    "yield_2y": 4.46,
+    "score_bp": 44.5,
+    "score_5d_ago_bp": 56.5,
+    "change_bp": -12.0,
     "lean": "hawkish"
   },
   "eur": {
-    "asof": "2026-11-04",
+    "asof": "2026-11-05",
     "policy_rate": 2.5,
-    "short_yield_6m": 2.883,
-    "yield_2y": 3.168,
-    "score_bp": 52.6,
-    "score_5d_ago_bp": 56.6,
-    "change_bp": -4.1,
+    "short_yield_6m": 2.885,
+    "yield_2y": 3.13,
+    "score_bp": 50.7,
+    "score_5d_ago_bp": 53.3,
+    "change_bp": -2.6,
     "lean": "hawkish"
   },
   "relative": {
-    "usd_minus_eur_bp": 0.9,
+    "usd_minus_eur_bp": -6.2,
     "reading": "about balanced"
   },
   "history": {
@@ -404,6 +404,12 @@
         "usd": 53.5,
         "eur": 52.6,
         "gap": 0.9
+      },
+      {
+        "date": "2026-11-05",
+        "usd": 44.5,
+        "eur": 50.7,
+        "gap": -6.2
       }
     ],
     "policy_changes": [
@@ -424,9 +430,9 @@
   "macro": {
     "usd": {
       "unemployment": {
-        "value": 4.2,
-        "prev": 4.1,
-        "asof": "2026-09-01"
+        "value": 4.1,
+        "prev": 4.2,
+        "asof": "2026-10-01"
       },
       "cpi_yoy": {
         "value": 3.72,
@@ -459,22 +465,6 @@
   },
   "calendar": {
     "events": [
-      {
-        "title": "Unemployment Claims",
-        "currency": "USD",
-        "time": "2026-11-05T13:30+00:00",
-        "impact": "Medium",
-        "forecast": "197K",
-        "previous": "194K"
-      },
-      {
-        "title": "ECB President Lagarde Speaks",
-        "currency": "EUR",
-        "time": "2026-11-05T18:00+00:00",
-        "impact": "Medium",
-        "forecast": "",
-        "previous": ""
-      },
       {
         "title": "Average Hourly Earnings m/m",
         "currency": "USD",
@@ -518,19 +508,19 @@
     ]
   },
   "cot": {
-    "asof": "2026-10-27",
-    "open_interest": 868188,
+    "asof": "2026-11-03",
+    "open_interest": 876122,
     "weeks": 52,
     "leveraged_funds": {
-      "net": -71574,
-      "change": -2734,
-      "pct_of_oi": -8.2,
+      "net": -78559,
+      "change": -6985,
+      "pct_of_oi": -9.0,
       "percentile_1y": 0
     },
     "asset_managers": {
-      "net": 173249,
-      "change": -17172,
-      "pct_of_oi": 20.0,
+      "net": 144925,
+      "change": -28324,
+      "pct_of_oi": 16.5,
       "percentile_1y": 0
     }
   }
