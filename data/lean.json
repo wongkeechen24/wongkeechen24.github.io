@@ -1,38 +1,32 @@
 {
-  "updated": "2026-11-12T05:38:48+00:00",
+  "updated": "2026-11-13T04:55:26+00:00",
   "usd": {
-    "asof": "2026-11-09",
+    "asof": "2026-11-10",
     "policy_rate": 3.88,
-    "short_yield_6m": 4.26,
-    "yield_2y": 4.56,
-    "score_bp": 53.0,
-    "score_5d_ago_bp": 54.0,
-    "change_bp": -1.0,
+    "short_yield_6m": 4.38,
+    "yield_2y": 4.73,
+    "score_bp": 67.5,
+    "score_5d_ago_bp": 55.5,
+    "change_bp": 12.0,
     "lean": "hawkish"
   },
   "eur": {
-    "asof": "2026-11-10",
+    "asof": "2026-11-11",
     "policy_rate": 2.5,
-    "short_yield_6m": 2.898,
-    "yield_2y": 3.178,
-    "score_bp": 53.8,
-    "score_5d_ago_bp": 52.7,
-    "change_bp": 1.1,
+    "short_yield_6m": 2.912,
+    "yield_2y": 3.209,
+    "score_bp": 56.1,
+    "score_5d_ago_bp": 52.6,
+    "change_bp": 3.5,
     "lean": "hawkish"
   },
   "relative": {
-    "usd_minus_eur_bp": -0.8,
+    "usd_minus_eur_bp": 11.4,
     "reading": "about balanced"
   },
   "history": {
     "days": 90,
     "points": [
-      {
-        "date": "2026-08-14",
-        "usd": 43.0,
-        "eur": 43.6,
-        "gap": -0.6
-      },
       {
         "date": "2026-08-17",
         "usd": 44.0,
@@ -401,9 +395,15 @@
       },
       {
         "date": "2026-11-10",
-        "usd": 53.0,
+        "usd": 67.5,
         "eur": 53.8,
-        "gap": -0.8
+        "gap": 13.7
+      },
+      {
+        "date": "2026-11-11",
+        "usd": 67.5,
+        "eur": 56.1,
+        "gap": 11.4
       }
     ],
     "policy_changes": [
@@ -459,14 +459,6 @@
   },
   "calendar": {
     "events": [
-      {
-        "title": "ECB President Lagarde Speaks",
-        "currency": "EUR",
-        "time": "2026-11-11T09:45+00:00",
-        "impact": "Medium",
-        "forecast": "",
-        "previous": ""
-      },
       {
         "title": "Unemployment Claims",
         "currency": "USD",
