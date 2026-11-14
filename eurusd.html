@@ -66,6 +66,12 @@ td small{display:block;color:var(--mute);font-size:12px}
 .note{font-size:13px;color:var(--mute);margin:10px 0 0}
 .tag{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;font-weight:700;border:1px solid var(--warn);color:var(--warn)}
 .ex{padding:8px 0;border-top:1px solid var(--line);font-size:14px}.ex b{display:block;font-weight:600}.ex span{color:var(--mute);font-size:13px}
+.rk{margin-top:10px}
+.rkb{position:relative;height:8px;border-radius:99px;background:linear-gradient(90deg,var(--down),var(--warn) 25%,var(--up) 50%,var(--warn) 75%,var(--down))}
+.rkb i{position:absolute;top:50%;width:14px;height:14px;margin-top:-7px;margin-left:-7px;border-radius:50%;background:var(--panel);border:3px solid var(--ink)}
+.rkb i.cr{border-color:var(--down)}.rkb i.ca{border-color:var(--warn)}.rkb i.cg{border-color:var(--up)}
+.rkl{display:flex;justify-content:space-between;font-size:12px;color:var(--mute);margin-top:4px}
+.rows b.cr{color:var(--down);font-weight:800}.rows b.ca{color:var(--warn)}.rows b.cg{color:var(--up)}
 .say{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:14px}
 @media(max-width:420px){.two{grid-template-columns:1fr}}
 </style>
@@ -156,7 +162,7 @@ zh:{title:"欧元美元 开盘前参考",
  s2:"2. 利率、失业率、CPI",s2sub:"这些数据每月公布一次，显示最新值和上一期",
  s3:"3. 重点新闻（链接）",s3sub:"点开直接看",gCal:"经济日历",gNews:"新闻快讯",gOff:"官方",
  l1:"公布时间、预期值、实际值",l2:"英文，可筛选影响等级",l3:"外汇快讯和解读",l4:"路透社外汇",l5:"新闻稿和声明",l6:"会议日程",l7:"欧洲央行新闻稿",l8:"非农、CPI 公布日程",l9:"欧元区数据公布日程",
- s4:"4. 大资金持仓（CFTC，欧元期货）",s4note:"每周五公布，数据是前一个周二的持仓，所以滞后约 3 到 10 天，只适合看大背景。净多代表看涨欧元对美元，净空代表看跌。近一年排位是这周的净持仓在过去 52 周里的排名：0% 是一年最低，100% 是一年最高。净空时数值是负的，所以 0% 代表空头最大。排位接近 0% 或 100% 说明仓位拥挤，趋势延续的风险偏高。",
+ s4:"4. 大资金持仓（CFTC，欧元期货）",s4note:"每周五公布，数据是前一个周二的持仓，所以滞后约 3 到 10 天，只适合看大背景。净多代表看涨欧元对美元，净空代表看跌。近一年排位是这周的净持仓在过去 52 周里的排名：0% 是一年最低，100% 是一年最高。净空时数值是负的，所以 0% 代表空头最大。排位接近 0% 或 100% 说明仓位拥挤，趋势延续的风险偏高。进度条的圆点越靠两端越红，说明越拥挤；越靠中间越绿，说明仓位越松。",
  policy:"政策利率",y6:"6个月收益率",y2:"2年期收益率",chg:"近5日变化",asof:"数据日期",
  unemp:"失业率",cpi:"CPI 年增率",core:"核心 CPI 年增率",prev:"上期",
  lean:{hawkish:"偏鹰",neutral:"中性",dovish:"偏鸽"},
@@ -170,6 +176,7 @@ zh:{title:"欧元美元 开盘前参考",
  updated:"更新",stale:"超过4天没更新，请检查 GitHub Actions",err:"读不到数据文件",noData:"暂无数据",
  lev:"对冲基金（杠杆资金）",am:"资产管理机构",netLong:"净多",netShort:"净空",wk:"较上周",oi:"占总持仓",pctl:"近一年排位",
  high:"接近一年最高",low:"接近一年最低",mid:"中间区域",cotAsof:"持仓日期",
+ rkLo:"一年最低",rkHi:"一年最高",
  sayLL:"仍是净多，但多头规模已降到一年来最小附近",sayLM:"净多，规模处于一年中等水平",sayLH:"净多，多头规模是一年来最大附近，仓位拥挤",
  saySL:"净空，且空头规模是一年来最大附近，仓位拥挤",saySM:"净空，规模处于一年中等水平",saySH:"仍是净空，但空头规模已降到一年来最小附近",
  s5:"5. 成交量与未平仓合约（CME 欧元期货）",s5sub:"每个交易日的数据，看市场是否异常活跃、有没有新资金进场",
@@ -189,7 +196,7 @@ en:{title:"EURUSD Pre-open Reference",
  s2:"2. Rates, unemployment, CPI",s2sub:"Released monthly; shows latest and previous reading",
  s3:"3. Key news (links)",s3sub:"Tap to open",gCal:"Economic calendar",gNews:"News",gOff:"Official",
  l1:"Release times, forecasts, actuals",l2:"With impact filter",l3:"FX headlines and commentary",l4:"Reuters FX",l5:"Press releases and statements",l6:"Meeting schedule",l7:"ECB press releases",l8:"NFP and CPI release schedule",l9:"Eurozone release schedule",
- s4:"4. Big-money positioning (CFTC, Euro FX futures)",s4note:"Published Fridays with positions as of the prior Tuesday, so it lags about 3 to 10 days. Use for background only. Net long means bullish EUR vs USD; net short means bearish. The 1-year rank shows where this week's net position sits among the past 52 weeks: 0% is the lowest, 100% the highest. A net short is a negative number, so 0% means the largest short. A rank near 0% or 100% means crowded positioning, raising trend-continuation risk.",
+ s4:"4. Big-money positioning (CFTC, Euro FX futures)",s4note:"Published Fridays with positions as of the prior Tuesday, so it lags about 3 to 10 days. Use for background only. Net long means bullish EUR vs USD; net short means bearish. The 1-year rank shows where this week's net position sits among the past 52 weeks: 0% is the lowest, 100% the highest. A net short is a negative number, so 0% means the largest short. A rank near 0% or 100% means crowded positioning, raising trend-continuation risk. On the bar, the closer the dot is to either end the redder it gets (more crowded); the closer to the middle the greener (looser).",
  policy:"Policy rate",y6:"6M yield",y2:"2Y yield",chg:"5-day change",asof:"Data date",
  unemp:"Unemployment",cpi:"CPI YoY",core:"Core CPI YoY",prev:"prev",
  lean:{hawkish:"Hawkish",neutral:"Neutral",dovish:"Dovish"},
@@ -203,6 +210,7 @@ en:{title:"EURUSD Pre-open Reference",
  updated:"Updated",stale:"Not updated for 4+ days, check GitHub Actions",err:"Cannot read data file",noData:"No data",
  lev:"Hedge funds (leveraged)",am:"Asset managers",netLong:"Net long",netShort:"Net short",wk:"vs last week",oi:"of open interest",pctl:"1-year rank",
  high:"Near 1-year high",low:"Near 1-year low",mid:"Mid-range",cotAsof:"Positions as of",
+ rkLo:"1-year low",rkHi:"1-year high",
  sayLL:"Still net long, but the long position is near its smallest in a year",sayLM:"Net long, mid-range size for the year",sayLH:"Net long, near the largest in a year, crowded",
  saySL:"Net short, near the largest short in a year, crowded",saySM:"Net short, mid-range size for the year",saySH:"Still net short, but the short position is near its smallest in a year",
  s5:"5. Volume and open interest (CME Euro FX futures)",s5sub:"Daily data: is the market unusually active, and is new money coming in?",
@@ -354,11 +362,14 @@ function render(){
   const c=D&&D.cot;
   if(!c||c.error){$("cot").innerHTML="";$("cotSub").textContent=(c&&c.error)?c.error:t("noData");return;}
   $("cotSub").textContent=t("cotAsof")+" "+c.asof;
+  const cr=x=>{const c=Math.abs(x.percentile_1y-50)*2;return c>=80?"cr":c>=50?"ca":"cg"};
   const say=x=>{const p=x.percentile_1y;return t((x.net>=0?"sayL":"sayS")+(p>=90?"H":p<=10?"L":"M"))};
   const card=(name,x)=>'<div class="card"><div class="cur">'+name+'</div><div class="big '+(x.net>=0?"dove":"hawk")+'">'+(x.net>=0?t("netLong"):t("netShort"))+" "+Math.abs(x.net).toLocaleString()+'</div><div class="rows">'+
     "<span>"+t("wk")+"</span><b>"+(x.change===null?"—":(x.change>0?"+":"")+x.change.toLocaleString())+"</b>"+
     "<span>"+t("oi")+"</span><b>"+x.pct_of_oi+"%</b>"+
-    "<span>"+t("pctl")+"</span><b>"+x.percentile_1y+"%</b></div><div class=\"say\">"+say(x)+"</div></div>";
+    "<span>"+t("pctl")+"</span><b class=\""+cr(x)+"\">"+x.percentile_1y+"%</b></div>"+
+    '<div class="rk"><div class="rkb"><i class="'+cr(x)+'" style="left:calc(7px + (100% - 14px) * '+(x.percentile_1y/100)+')"></i></div><div class="rkl"><span>'+t("rkLo")+"</span><span>"+t("rkHi")+"</span></div></div>"+
+    '<div class="say">'+say(x)+"</div></div>";
   $("cot").innerHTML=card(t("lev"),c.leveraged_funds)+card(t("am"),c.asset_managers);
 }
 document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{lang=b.dataset.lang;try{localStorage.setItem("lang",lang)}catch(e){}render()});
