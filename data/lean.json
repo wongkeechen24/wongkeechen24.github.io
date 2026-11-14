@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-14T13:33:23+00:00",
+  "updated": "2026-11-14T13:41:50+00:00",
   "usd": {
     "asof": "2026-11-12",
     "policy_rate": 3.88,
@@ -464,7 +464,7 @@
     }
   },
   "calendar": {
-    "error": "calendar feed returned no USD/EUR events"
+    "events": []
   },
   "cot": {
     "asof": "2026-11-03",
