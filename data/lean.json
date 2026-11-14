@@ -1,28 +1,28 @@
 {
-  "updated": "2026-11-13T04:55:26+00:00",
+  "updated": "2026-11-14T04:49:10+00:00",
   "usd": {
-    "asof": "2026-11-10",
+    "asof": "2026-11-12",
     "policy_rate": 3.88,
-    "short_yield_6m": 4.38,
-    "yield_2y": 4.73,
-    "score_bp": 67.5,
-    "score_5d_ago_bp": 55.5,
-    "change_bp": 12.0,
+    "short_yield_6m": 4.42,
+    "yield_2y": 4.86,
+    "score_bp": 76.0,
+    "score_5d_ago_bp": 53.5,
+    "change_bp": 22.5,
     "lean": "hawkish"
   },
   "eur": {
-    "asof": "2026-11-11",
+    "asof": "2026-11-12",
     "policy_rate": 2.5,
-    "short_yield_6m": 2.912,
-    "yield_2y": 3.209,
-    "score_bp": 56.1,
-    "score_5d_ago_bp": 52.6,
-    "change_bp": 3.5,
+    "short_yield_6m": 2.915,
+    "yield_2y": 3.244,
+    "score_bp": 57.9,
+    "score_5d_ago_bp": 50.7,
+    "change_bp": 7.2,
     "lean": "hawkish"
   },
   "relative": {
-    "usd_minus_eur_bp": 11.4,
-    "reading": "about balanced"
+    "usd_minus_eur_bp": 18.1,
+    "reading": "USD more hawkish than EUR"
   },
   "history": {
     "days": 90,
@@ -404,6 +404,12 @@
         "usd": 67.5,
         "eur": 56.1,
         "gap": 11.4
+      },
+      {
+        "date": "2026-11-12",
+        "usd": 76.0,
+        "eur": 57.9,
+        "gap": 18.1
       }
     ],
     "policy_changes": [
@@ -440,41 +446,11 @@
       }
     },
     "eur": {
-      "unemployment": {
-        "value": 6.5,
-        "prev": 6.5,
-        "asof": "2026-09"
-      },
-      "cpi_yoy": {
-        "value": 4.0,
-        "prev": 3.8,
-        "asof": "2026-10"
-      },
-      "core_cpi_yoy": {
-        "value": 2.5,
-        "prev": 2.5,
-        "asof": "2026-10"
-      }
+      "error": "The read operation timed out"
     }
   },
   "calendar": {
     "events": [
-      {
-        "title": "Unemployment Claims",
-        "currency": "USD",
-        "time": "2026-11-12T13:30+00:00",
-        "impact": "Medium",
-        "forecast": "194K",
-        "previous": "189K"
-      },
-      {
-        "title": "ECB President Lagarde Speaks",
-        "currency": "EUR",
-        "time": "2026-11-12T19:30+00:00",
-        "impact": "Medium",
-        "forecast": "",
-        "previous": ""
-      },
       {
         "title": "Core PPI m/m",
         "currency": "USD",
