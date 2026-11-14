@@ -65,6 +65,8 @@ td small{display:block;color:var(--mute);font-size:12px}
 .imp.High{border-color:var(--down);color:var(--down)}
 .note{font-size:13px;color:var(--mute);margin:10px 0 0}
 .tag{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;font-weight:700;border:1px solid var(--warn);color:var(--warn)}
+.ex{padding:8px 0;border-top:1px solid var(--line);font-size:14px}.ex b{display:block;font-weight:600}.ex span{color:var(--mute);font-size:13px}
+.say{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:14px}
 @media(max-width:420px){.two{grid-template-columns:1fr}}
 </style>
 </head>
@@ -130,6 +132,21 @@ td small{display:block;color:var(--mute);font-size:12px}
   <p class="note" data-i="s4note"></p>
 </section>
 
+<section class="links">
+  <h2 data-i="s5"></h2><p class="sub" data-i="s5sub"></p>
+  <a href="https://www.cmegroup.com/markets/fx/g10/euro-fx/volume" target="_blank" rel="noopener">CME Euro FX<span data-i="l10"></span></a>
+  <h3 data-i="s5H1"></h3>
+  <div class="ex"><b data-i="e1a"></b><span data-i="e1b"></span></div>
+  <div class="ex"><b data-i="e2a"></b><span data-i="e2b"></span></div>
+  <h3 data-i="s5H2"></h3>
+  <div class="ex"><b data-i="e3a"></b><span data-i="e3b"></span></div>
+  <div class="ex"><b data-i="e4a"></b><span data-i="e4b"></span></div>
+  <div class="ex"><b data-i="e5a"></b><span data-i="e5b"></span></div>
+  <div class="ex"><b data-i="e6a"></b><span data-i="e6b"></span></div>
+  <p class="note" data-i="s5eg"></p>
+  <p class="note" data-i="s5note"></p>
+</section>
+
 </main>
 <script>
 const T={
@@ -139,7 +156,7 @@ zh:{title:"欧元美元 开盘前参考",
  s2:"2. 利率、失业率、CPI",s2sub:"这些数据每月公布一次，显示最新值和上一期",
  s3:"3. 重点新闻（链接）",s3sub:"点开直接看",gCal:"经济日历",gNews:"新闻快讯",gOff:"官方",
  l1:"公布时间、预期值、实际值",l2:"英文，可筛选影响等级",l3:"外汇快讯和解读",l4:"路透社外汇",l5:"新闻稿和声明",l6:"会议日程",l7:"欧洲央行新闻稿",l8:"非农、CPI 公布日程",l9:"欧元区数据公布日程",
- s4:"4. 大资金持仓（CFTC，欧元期货）",s4note:"每周五公布，数据是前一个周二的持仓，所以滞后约 3 到 10 天，只适合看大背景。净多代表看涨欧元对美元。极端位置（接近一年最高或最低）说明仓位拥挤，趋势延续的风险偏高。",
+ s4:"4. 大资金持仓（CFTC，欧元期货）",s4note:"每周五公布，数据是前一个周二的持仓，所以滞后约 3 到 10 天，只适合看大背景。净多代表看涨欧元对美元，净空代表看跌。近一年排位是这周的净持仓在过去 52 周里的排名：0% 是一年最低，100% 是一年最高。净空时数值是负的，所以 0% 代表空头最大。排位接近 0% 或 100% 说明仓位拥挤，趋势延续的风险偏高。",
  policy:"政策利率",y6:"6个月收益率",y2:"2年期收益率",chg:"近5日变化",asof:"数据日期",
  unemp:"失业率",cpi:"CPI 年增率",core:"核心 CPI 年增率",prev:"上期",
  lean:{hawkish:"偏鹰",neutral:"中性",dovish:"偏鸽"},
@@ -151,15 +168,28 @@ zh:{title:"欧元美元 开盘前参考",
  
  calH:"未来 14 天重要数据（美元、欧元）",todayNone:"今天没有高影响数据。",todayHas:"今天有重要数据：",fc:"预期",pv:"前值",done:"已公布",hi:"高",md:"中",today:"今天",tmr:"明天",calErr:"读不到日历数据",calHint:"时间按新加坡时区。日历每个自动更新日读一次，预期值可能在数据公布前有变动。",
  updated:"更新",stale:"超过4天没更新，请检查 GitHub Actions",err:"读不到数据文件",noData:"暂无数据",
- lev:"对冲基金（杠杆资金）",am:"资产管理机构",netLong:"净多",netShort:"净空",wk:"较上周",oi:"占总持仓",pctl:"近一年位置",
- high:"接近一年最高",low:"接近一年最低",mid:"中间区域",cotAsof:"持仓日期"},
+ lev:"对冲基金（杠杆资金）",am:"资产管理机构",netLong:"净多",netShort:"净空",wk:"较上周",oi:"占总持仓",pctl:"近一年排位",
+ high:"接近一年最高",low:"接近一年最低",mid:"中间区域",cotAsof:"持仓日期",
+ sayLL:"仍是净多，但多头规模已降到一年来最小附近",sayLM:"净多，规模处于一年中等水平",sayLH:"净多，多头规模是一年来最大附近，仓位拥挤",
+ saySL:"净空，且空头规模是一年来最大附近，仓位拥挤",saySM:"净空，规模处于一年中等水平",saySH:"仍是净空，但空头规模已降到一年来最小附近",
+ s5:"5. 成交量与未平仓合约（CME 欧元期货）",s5sub:"每个交易日的数据，看市场是否异常活跃、有没有新资金进场",
+ l10:"点开后选 Futures，看图表：深蓝柱是成交量，浅蓝线是未平仓合约",s5H1:"这两个指标是什么",
+ e1a:"成交量（柱子）",e1b:"当天成交了多少张合约。明显高于前几天，说明市场特别活跃，通常对应大消息或大行情。",
+ e2a:"未平仓合约 OI（线）",e2b:"市场上还没平掉的合约总数，代表参与的资金规模。线往上，说明有新仓位进场；线往下，说明有人在平仓离场。",
+ s5H2:"配合价格怎么读（例子）",
+ e3a:"价格下跌 + OI 上升",e3b:"多半是新空头进场，下跌有新资金推动，趋势可能延续。",
+ e4a:"价格下跌 + OI 下降",e4b:"多半是多头在平仓离场，不是新空头，下跌的力量偏弱。",
+ e5a:"价格上涨 + OI 上升",e5b:"多半是新多头进场，上涨有新资金推动。",
+ e6a:"价格上涨 + OI 下降",e6b:"多半是空头在回补，上涨可能不持久。",
+ s5eg:"例：昨天欧元下跌，柱子比前几天高，浅蓝线往上翘，说明昨天可能有新空头在推动下跌。",
+ s5note:"数据是前一个交易日的。只能看出有没有新资金，看不出是哪类机构（机构多空看上面第 4 部分）。以上是经验规则，不是确定信号。"},
 en:{title:"EURUSD Pre-open Reference",
  s1:"1. Market view on USD and EUR",s1sub:"Auto-updated each trading day",
  s1note:"Derived from the gap between 6-month and 2-year government yields and the policy rate. A rough directional reference, not rate-move probabilities. A hawkish label is common, so focus on the 5-day change and the USD vs EUR comparison.",
  s2:"2. Rates, unemployment, CPI",s2sub:"Released monthly; shows latest and previous reading",
  s3:"3. Key news (links)",s3sub:"Tap to open",gCal:"Economic calendar",gNews:"News",gOff:"Official",
  l1:"Release times, forecasts, actuals",l2:"With impact filter",l3:"FX headlines and commentary",l4:"Reuters FX",l5:"Press releases and statements",l6:"Meeting schedule",l7:"ECB press releases",l8:"NFP and CPI release schedule",l9:"Eurozone release schedule",
- s4:"4. Big-money positioning (CFTC, Euro FX futures)",s4note:"Published Fridays with positions as of the prior Tuesday, so it lags about 3 to 10 days. Use for background only. Net long means bullish EUR vs USD. Readings near the 1-year high or low mean crowded positioning, raising trend-continuation risk.",
+ s4:"4. Big-money positioning (CFTC, Euro FX futures)",s4note:"Published Fridays with positions as of the prior Tuesday, so it lags about 3 to 10 days. Use for background only. Net long means bullish EUR vs USD; net short means bearish. The 1-year rank shows where this week's net position sits among the past 52 weeks: 0% is the lowest, 100% the highest. A net short is a negative number, so 0% means the largest short. A rank near 0% or 100% means crowded positioning, raising trend-continuation risk.",
  policy:"Policy rate",y6:"6M yield",y2:"2Y yield",chg:"5-day change",asof:"Data date",
  unemp:"Unemployment",cpi:"CPI YoY",core:"Core CPI YoY",prev:"prev",
  lean:{hawkish:"Hawkish",neutral:"Neutral",dovish:"Dovish"},
@@ -172,7 +202,20 @@ en:{title:"EURUSD Pre-open Reference",
  calH:"Upcoming key releases, next 14 days (USD, EUR)",todayNone:"No high-impact releases today.",todayHas:"Key releases today: ",fc:"Fcst",pv:"Prev",done:"Released",hi:"High",md:"Med",today:"Today",tmr:"Tomorrow",calErr:"Cannot read calendar data",calHint:"Times in Singapore time. The calendar refreshes once per update day, so forecasts may change before release.",
  updated:"Updated",stale:"Not updated for 4+ days, check GitHub Actions",err:"Cannot read data file",noData:"No data",
  lev:"Hedge funds (leveraged)",am:"Asset managers",netLong:"Net long",netShort:"Net short",wk:"vs last week",oi:"of open interest",pctl:"1-year rank",
- high:"Near 1-year high",low:"Near 1-year low",mid:"Mid-range",cotAsof:"Positions as of"}
+ high:"Near 1-year high",low:"Near 1-year low",mid:"Mid-range",cotAsof:"Positions as of",
+ sayLL:"Still net long, but the long position is near its smallest in a year",sayLM:"Net long, mid-range size for the year",sayLH:"Net long, near the largest in a year, crowded",
+ saySL:"Net short, near the largest short in a year, crowded",saySM:"Net short, mid-range size for the year",saySH:"Still net short, but the short position is near its smallest in a year",
+ s5:"5. Volume and open interest (CME Euro FX futures)",s5sub:"Daily data: is the market unusually active, and is new money coming in?",
+ l10:"Open it, choose Futures, and read the chart: dark bars are volume, the light blue line is open interest",s5H1:"What the two measures are",
+ e1a:"Volume (bars)",e1b:"How many contracts traded that day. Clearly higher than the past few days means the market is unusually active, often on big news or a big move.",
+ e2a:"Open interest, OI (line)",e2b:"Total contracts still open in the market, a measure of how much money is committed. Line rising means new positions are coming in; falling means positions are being closed.",
+ s5H2:"How to read it with price (examples)",
+ e3a:"Price down + OI up",e3b:"Most likely new shorts entering. New money is driving the fall, so the trend may continue.",
+ e4a:"Price down + OI down",e4b:"Most likely longs closing out, not new shorts. The selling pressure is weaker.",
+ e5a:"Price up + OI up",e5b:"Most likely new longs entering. New money is driving the rise.",
+ e6a:"Price up + OI down",e6b:"Most likely shorts covering. The rise may not last.",
+ s5eg:"Example: EUR fell yesterday, the bar is taller than previous days and the light blue line ticks up. That suggests new shorts may have driven the fall.",
+ s5note:"Data is for the previous trading day. It shows whether new money is coming in, not which type of trader (see section 4 above for that). These are rules of thumb, not firm signals."}
 };
 let lang="zh",D=null,ERR=false;
 try{lang=localStorage.getItem("lang")||"zh"}catch(e){}
@@ -311,11 +354,11 @@ function render(){
   const c=D&&D.cot;
   if(!c||c.error){$("cot").innerHTML="";$("cotSub").textContent=(c&&c.error)?c.error:t("noData");return;}
   $("cotSub").textContent=t("cotAsof")+" "+c.asof;
-  const pos=p=>p>=90?t("high"):p<=10?t("low"):t("mid");
+  const say=x=>{const p=x.percentile_1y;return t((x.net>=0?"sayL":"sayS")+(p>=90?"H":p<=10?"L":"M"))};
   const card=(name,x)=>'<div class="card"><div class="cur">'+name+'</div><div class="big '+(x.net>=0?"dove":"hawk")+'">'+(x.net>=0?t("netLong"):t("netShort"))+" "+Math.abs(x.net).toLocaleString()+'</div><div class="rows">'+
     "<span>"+t("wk")+"</span><b>"+(x.change===null?"—":(x.change>0?"+":"")+x.change.toLocaleString())+"</b>"+
     "<span>"+t("oi")+"</span><b>"+x.pct_of_oi+"%</b>"+
-    "<span>"+t("pctl")+"</span><b>"+x.percentile_1y+"% · "+pos(x.percentile_1y)+"</b></div></div>";
+    "<span>"+t("pctl")+"</span><b>"+x.percentile_1y+"%</b></div><div class=\"say\">"+say(x)+"</div></div>";
   $("cot").innerHTML=card(t("lev"),c.leveraged_funds)+card(t("am"),c.asset_managers);
 }
 document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{lang=b.dataset.lang;try{localStorage.setItem("lang",lang)}catch(e){}render()});
