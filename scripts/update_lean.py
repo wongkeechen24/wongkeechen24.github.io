@@ -11,10 +11,17 @@ FRED_KEY = os.environ.get("FRED_API_KEY", "")
 COT_URL = "https://publicreporting.cftc.gov/resource/gpe5-46if.json?"
 
 
-def get(url):
-    req = urllib.request.Request(url, headers={"User-Agent": "lean-bot"})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return r.read().decode("utf-8")
+def get(url, tries=3):
+    last = None
+    for i in range(tries):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "lean-bot"})
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return r.read().decode("utf-8")
+        except Exception as e:
+            last = e
+            time.sleep(3 * (i + 1))
+    raise last
 
 
 def fred(series, n=12):
@@ -73,12 +80,21 @@ def latest(series):
 def yoy(series):
     d = dict(series)
 
+    def month_add(date, k):
+        y, m, day = date.split("-")
+        idx = int(y) * 12 + int(m) - 1 + k
+        return "%d-%02d-%s" % (idx // 12, idx % 12 + 1, day)
+
     def at(date):
-        year, rest = date.split("-", 1)
-        ago = "%d-%s" % (int(year) - 1, rest)
-        if ago in d:
-            return round((d[date] / d[ago] - 1) * 100, 2)
-        return None
+        ago = month_add(date, -12)
+        base = d.get(ago)
+        if base is None:
+            # missing month (e.g. US CPI Oct 2025 was never published): average the neighbours
+            lo, hi = d.get(month_add(ago, -1)), d.get(month_add(ago, 1))
+            if lo is None or hi is None:
+                return None
+            base = (lo + hi) / 2
+        return round((d[date] / base - 1) * 100, 2)
 
     dates = [s[0] for s in series]
     return {"value": at(dates[0]),
@@ -256,23 +272,26 @@ except Exception as e:
     result["history"] = {"error": str(e)}
 
 # 2. Macro data
-macro = {}
-try:
-    macro["usd"] = {
-        "unemployment": latest(fred("UNRATE", 3)),
-        "cpi_yoy": yoy(fred("CPIAUCSL", 30)),
-        "core_cpi_yoy": yoy(fred("CPILFESL", 30)),
-    }
-except Exception as e:
-    macro["usd"] = {"error": str(e)}
-try:
-    macro["eur"] = {
-        "unemployment": latest(ecb("LFSI", "M.U2.S.UNEHRT.TOTAL0.15_74.T", 3)),
-        "cpi_yoy": latest(ecb("HICP", "M.U2.N.000000.4D0.ANR", 3)),
-        "core_cpi_yoy": latest(ecb("HICP", "M.U2.N.XEF000.4D0.ANR", 3)),
-    }
-except Exception as e:
-    macro["eur"] = {"error": str(e)}
+macro = {"usd": {}, "eur": {}}
+errs = {"usd": [], "eur": []}
+
+
+def pick(side_name, key, fn):
+    try:
+        macro[side_name][key] = fn()
+    except Exception as e:
+        errs[side_name].append("%s: %s" % (key, e))
+
+
+pick("usd", "unemployment", lambda: latest(fred("UNRATE", 3)))
+pick("usd", "cpi_yoy", lambda: yoy(fred("CPIAUCSL", 30)))
+pick("usd", "core_cpi_yoy", lambda: yoy(fred("CPILFESL", 30)))
+pick("eur", "unemployment", lambda: latest(ecb("LFSI", "M.U2.S.UNEHRT.TOTAL0.15_74.T", 3)))
+pick("eur", "cpi_yoy", lambda: latest(ecb("HICP", "M.U2.N.000000.4D0.ANR", 3)))
+pick("eur", "core_cpi_yoy", lambda: latest(ecb("HICP", "M.U2.N.XEF000.4D0.ANR", 3)))
+for k in ("usd", "eur"):
+    if errs[k]:
+        macro[k]["error"] = " | ".join(errs[k])
 result["macro"] = macro
 
 # 2b. Upcoming releases
