@@ -147,6 +147,10 @@ def calendar():
             if name == "thisweek":
                 raise
             continue
+        if not isinstance(data, list):
+            if name == "thisweek":
+                raise ValueError("calendar feed returned unexpected data")
+            continue
         for e in data:
             if e.get("country") not in ("USD", "EUR") or e.get("impact") not in ("High", "Medium"):
                 continue
@@ -165,9 +169,7 @@ def calendar():
                            "forecast": e.get("forecast") or "", "previous": e.get("previous") or ""})
         time.sleep(2)
     events.sort(key=lambda x: x["time"])
-    if not events:
-        raise ValueError("calendar feed returned no USD/EUR events")
-    return {"events": events}
+    return {"events": events}  # empty list is fine (e.g. weekend)
 
 
 def fred_range(series, start):
