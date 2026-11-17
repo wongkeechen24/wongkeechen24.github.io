@@ -1,44 +1,32 @@
 {
-  "updated": "2026-11-14T13:41:50+00:00",
+  "updated": "2026-11-17T06:23:50+00:00",
   "usd": {
-    "asof": "2026-11-12",
+    "asof": "2026-11-13",
     "policy_rate": 3.88,
     "short_yield_6m": 4.42,
-    "yield_2y": 4.86,
-    "score_bp": 76.0,
-    "score_5d_ago_bp": 53.5,
-    "change_bp": 22.5,
+    "yield_2y": 4.88,
+    "score_bp": 77.0,
+    "score_5d_ago_bp": 44.5,
+    "change_bp": 32.5,
     "lean": "hawkish"
   },
   "eur": {
-    "asof": "2026-11-12",
+    "asof": "2026-11-13",
     "policy_rate": 2.5,
-    "short_yield_6m": 2.915,
-    "yield_2y": 3.244,
-    "score_bp": 57.9,
-    "score_5d_ago_bp": 50.7,
-    "change_bp": 7.2,
+    "short_yield_6m": 2.907,
+    "yield_2y": 3.239,
+    "score_bp": 57.3,
+    "score_5d_ago_bp": 47.7,
+    "change_bp": 9.6,
     "lean": "hawkish"
   },
   "relative": {
-    "usd_minus_eur_bp": 18.1,
+    "usd_minus_eur_bp": 19.7,
     "reading": "USD more hawkish than EUR"
   },
   "history": {
     "days": 90,
     "points": [
-      {
-        "date": "2026-08-17",
-        "usd": 44.0,
-        "eur": 44.2,
-        "gap": -0.2
-      },
-      {
-        "date": "2026-08-18",
-        "usd": 43.5,
-        "eur": 47.4,
-        "gap": -3.9
-      },
       {
         "date": "2026-08-19",
         "usd": 43.5,
@@ -410,6 +398,12 @@
         "usd": 76.0,
         "eur": 57.9,
         "gap": 18.1
+      },
+      {
+        "date": "2026-11-13",
+        "usd": 77.0,
+        "eur": 57.3,
+        "gap": 19.7
       }
     ],
     "policy_changes": [
@@ -464,23 +458,120 @@
     }
   },
   "calendar": {
-    "events": []
+    "events": [
+      {
+        "title": "Fed Chairman Warsh Speaks",
+        "currency": "USD",
+        "time": "2026-11-16T17:00+00:00",
+        "impact": "High",
+        "forecast": "",
+        "previous": ""
+      },
+      {
+        "title": "Core Retail Sales m/m",
+        "currency": "USD",
+        "time": "2026-11-17T13:30+00:00",
+        "impact": "High",
+        "forecast": "0.4%",
+        "previous": "0.9%"
+      },
+      {
+        "title": "Retail Sales m/m",
+        "currency": "USD",
+        "time": "2026-11-17T13:30+00:00",
+        "impact": "High",
+        "forecast": "0.1%",
+        "previous": "0.8%"
+      },
+      {
+        "title": "ECB Financial Stability Review",
+        "currency": "EUR",
+        "time": "2026-11-18T09:00+00:00",
+        "impact": "Medium",
+        "forecast": "",
+        "previous": ""
+      },
+      {
+        "title": "ECB President Lagarde Speaks",
+        "currency": "EUR",
+        "time": "2026-11-18T14:25+00:00",
+        "impact": "Medium",
+        "forecast": "",
+        "previous": ""
+      },
+      {
+        "title": "FOMC Meeting Minutes",
+        "currency": "USD",
+        "time": "2026-11-18T19:00+00:00",
+        "impact": "High",
+        "forecast": "",
+        "previous": ""
+      },
+      {
+        "title": "ECB President Lagarde Speaks",
+        "currency": "EUR",
+        "time": "2026-11-19T13:30+00:00",
+        "impact": "Medium",
+        "forecast": "",
+        "previous": ""
+      },
+      {
+        "title": "Philly Fed Manufacturing Index",
+        "currency": "USD",
+        "time": "2026-11-19T13:30+00:00",
+        "impact": "Medium",
+        "forecast": "19.2",
+        "previous": "20.9"
+      },
+      {
+        "title": "Unemployment Claims",
+        "currency": "USD",
+        "time": "2026-11-19T13:30+00:00",
+        "impact": "Medium",
+        "forecast": "199K",
+        "previous": "200K"
+      },
+      {
+        "title": "ECB President Lagarde Speaks",
+        "currency": "EUR",
+        "time": "2026-11-20T08:15+00:00",
+        "impact": "Medium",
+        "forecast": "",
+        "previous": ""
+      },
+      {
+        "title": "Revised UoM Consumer Sentiment",
+        "currency": "USD",
+        "time": "2026-11-20T15:00+00:00",
+        "impact": "Medium",
+        "forecast": "52.1",
+        "previous": "51.0"
+      },
+      {
+        "title": "Revised UoM Inflation Expectations",
+        "currency": "USD",
+        "time": "2026-11-20T15:00+00:00",
+        "impact": "Medium",
+        "forecast": "",
+        "previous": "4.3%"
+      }
+    ]
   },
   "cot": {
-    "asof": "2026-11-03",
-    "open_interest": 876122,
+    "asof": "2026-11-10",
+    "open_interest": 854705,
     "weeks": 52,
     "leveraged_funds": {
-      "net": -78559,
-      "change": -6985,
-      "pct_of_oi": -9.0,
-      "percentile_1y": 0
+      "net": -71676,
+      "change": 6883,
+      "pct_of_oi": -8.4,
+      "percentile_1y": 2
     },
     "asset_managers": {
-      "net": 144925,
-      "change": -28324,
-      "pct_of_oi": 16.5,
-      "percentile_1y": 0
+      "net": 165477,
+      "change": 20552,
+      "pct_of_oi": 19.4,
+      "percentile_1y": 2
     }
   }
 }
