@@ -1,38 +1,32 @@
 {
-  "updated": "2026-11-19T05:47:57+00:00",
+  "updated": "2026-11-20T05:37:02+00:00",
   "usd": {
-    "asof": "2026-11-17",
+    "asof": "2026-11-18",
     "policy_rate": 3.88,
-    "short_yield_6m": 4.41,
+    "short_yield_6m": 4.43,
     "yield_2y": 4.8,
-    "score_bp": 72.5,
-    "score_5d_ago_bp": 53.0,
-    "change_bp": 19.5,
+    "score_bp": 73.5,
+    "score_5d_ago_bp": 67.5,
+    "change_bp": 6.0,
     "lean": "hawkish"
   },
   "eur": {
-    "asof": "2026-11-17",
+    "asof": "2026-11-18",
     "policy_rate": 2.5,
-    "short_yield_6m": 2.927,
-    "yield_2y": 3.255,
-    "score_bp": 59.1,
-    "score_5d_ago_bp": 53.8,
-    "change_bp": 5.3,
+    "short_yield_6m": 2.926,
+    "yield_2y": 3.259,
+    "score_bp": 59.3,
+    "score_5d_ago_bp": 56.1,
+    "change_bp": 3.2,
     "lean": "hawkish"
   },
   "relative": {
-    "usd_minus_eur_bp": 13.4,
+    "usd_minus_eur_bp": 14.2,
     "reading": "about balanced"
   },
   "history": {
     "days": 90,
     "points": [
-      {
-        "date": "2026-08-21",
-        "usd": 46.5,
-        "eur": 47.1,
-        "gap": -0.6
-      },
       {
         "date": "2026-08-24",
         "usd": 47.0,
@@ -404,6 +398,12 @@
         "usd": 72.5,
         "eur": 59.1,
         "gap": 13.4
+      },
+      {
+        "date": "2026-11-18",
+        "usd": 73.5,
+        "eur": 59.3,
+        "gap": 14.2
       }
     ],
     "policy_changes": [
@@ -459,30 +459,6 @@
   },
   "calendar": {
     "events": [
-      {
-        "title": "ECB Financial Stability Review",
-        "currency": "EUR",
-        "time": "2026-11-18T09:00+00:00",
-        "impact": "Medium",
-        "forecast": "",
-        "previous": ""
-      },
-      {
-        "title": "ECB President Lagarde Speaks",
-        "currency": "EUR",
-        "time": "2026-11-18T14:25+00:00",
-        "impact": "Medium",
-        "forecast": "",
-        "previous": ""
-      },
-      {
-        "title": "FOMC Meeting Minutes",
-        "currency": "USD",
-        "time": "2026-11-18T19:00+00:00",
-        "impact": "High",
-        "forecast": "",
-        "previous": ""
-      },
       {
         "title": "ECB President Lagarde Speaks",
         "currency": "EUR",
