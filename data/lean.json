@@ -1,27 +1,27 @@
 {
-  "updated": "2026-11-20T05:37:02+00:00",
+  "updated": "2026-11-21T05:29:50+00:00",
   "usd": {
-    "asof": "2026-11-18",
+    "asof": "2026-11-19",
     "policy_rate": 3.88,
-    "short_yield_6m": 4.43,
-    "yield_2y": 4.8,
-    "score_bp": 73.5,
-    "score_5d_ago_bp": 67.5,
-    "change_bp": 6.0,
+    "short_yield_6m": 4.42,
+    "yield_2y": 4.76,
+    "score_bp": 71.0,
+    "score_5d_ago_bp": 76.0,
+    "change_bp": -5.0,
     "lean": "hawkish"
   },
   "eur": {
-    "asof": "2026-11-18",
+    "asof": "2026-11-19",
     "policy_rate": 2.5,
-    "short_yield_6m": 2.926,
-    "yield_2y": 3.259,
-    "score_bp": 59.3,
-    "score_5d_ago_bp": 56.1,
-    "change_bp": 3.2,
+    "short_yield_6m": 2.934,
+    "yield_2y": 3.293,
+    "score_bp": 61.3,
+    "score_5d_ago_bp": 57.9,
+    "change_bp": 3.4,
     "lean": "hawkish"
   },
   "relative": {
-    "usd_minus_eur_bp": 14.2,
+    "usd_minus_eur_bp": 9.7,
     "reading": "about balanced"
   },
   "history": {
@@ -404,6 +404,12 @@
         "usd": 73.5,
         "eur": 59.3,
         "gap": 14.2
+      },
+      {
+        "date": "2026-11-19",
+        "usd": 71.0,
+        "eur": 61.3,
+        "gap": 9.7
       }
     ],
     "policy_changes": [
@@ -462,30 +468,6 @@
       {
         "title": "ECB President Lagarde Speaks",
         "currency": "EUR",
-        "time": "2026-11-19T13:30+00:00",
-        "impact": "Medium",
-        "forecast": "",
-        "previous": ""
-      },
-      {
-        "title": "Philly Fed Manufacturing Index",
-        "currency": "USD",
-        "time": "2026-11-19T13:30+00:00",
-        "impact": "Medium",
-        "forecast": "20.6",
-        "previous": "20.9"
-      },
-      {
-        "title": "Unemployment Claims",
-        "currency": "USD",
-        "time": "2026-11-19T13:30+00:00",
-        "impact": "Medium",
-        "forecast": "198K",
-        "previous": "200K"
-      },
-      {
-        "title": "ECB President Lagarde Speaks",
-        "currency": "EUR",
         "time": "2026-11-20T08:15+00:00",
         "impact": "Medium",
         "forecast": "",
@@ -506,23 +488,31 @@
         "impact": "Medium",
         "forecast": "",
         "previous": "4.3%"
+      },
+      {
+        "title": "President Trump Speaks",
+        "currency": "USD",
+        "time": "2026-11-20T17:00+00:00",
+        "impact": "Medium",
+        "forecast": "",
+        "previous": ""
       }
     ]
   },
   "cot": {
-    "asof": "2026-11-10",
-    "open_interest": 854705,
+    "asof": "2026-11-17",
+    "open_interest": 866032,
     "weeks": 52,
     "leveraged_funds": {
-      "net": -71676,
-      "change": 6883,
-      "pct_of_oi": -8.4,
+      "net": -76587,
+      "change": -4911,
+      "pct_of_oi": -8.8,
       "percentile_1y": 2
     },
     "asset_managers": {
-      "net": 165477,
-      "change": 20552,
-      "pct_of_oi": 19.4,
+      "net": 147234,
+      "change": -18243,
+      "pct_of_oi": 17.0,
       "percentile_1y": 2
     }
   }
